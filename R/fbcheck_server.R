@@ -163,7 +163,19 @@ fbcheck_server <- function(input, output, session, values) {
     if(!is.null(DF)){
       
       traits <- get_trait_fb(DF)
-      saveRDS(DF,"hot_fieldbook.rds")
+      
+      ##begin fbglobal
+      path <- fbglobal::get_base_dir()
+      path <- paste(path,"hot_fieldbook.rds", sep="\\")
+      saveRDS(DF, path)
+      
+      #enf fbglobal
+      
+      #saveRDS(DF,"hot_fieldbook.rds")
+      
+      
+      
+      
       crop <- hot_crop()
       trial <- hot_trial()
       print(DF)
@@ -896,7 +908,21 @@ fbcheck_server <- function(input, output, session, values) {
                    
                    else { 
                      
-                     DF <- readRDS("hot_fieldbook.rds")
+                     ##begin fbglobal
+                     path <- fbglobal::get_base_dir()
+                     path <- paste(path,"hot_fieldbook.rds", sep="\\")
+                     DF <- readRDS(path)
+                      #enf fbglobal
+                     
+                     
+                     
+                     
+                     
+                     #DF <- readRDS("hot_fieldbook.rds")
+                     
+                     
+                     
+                     
                      trait <- get_trait_fb(DF)
                    
                      
