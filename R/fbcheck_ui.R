@@ -13,7 +13,7 @@ fbcheck_ui <- function(type="tab", title="Data Quality and Processing", name="da
                           h2(title),   
                           
                           box(
-                            title = "Data Quality", status = "primary", solidHeader = TRUE,
+                            title = " ", status = "primary", solidHeader = TRUE,
                             collapsible = TRUE, width = NULL,
                             
                             try(shinyFiles::shinyFilesButton('file', 'File select', 'Please select a file',FALSE)),
