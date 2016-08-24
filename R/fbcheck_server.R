@@ -132,6 +132,8 @@ fbcheck_server <- function(input, output, session, values) {
 
   output$hot_btable  <-  renderRHandsontable({
     
+    req(input$file)
+    
     if(hot_trial()!="Participatory Varietal Selection"){
     
     values  <-  shiny::reactiveValues(
