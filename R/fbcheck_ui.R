@@ -27,7 +27,7 @@ fbcheck_ui <- function(type="tab", title="Data Quality and Processing", name="da
                             
                           #tabsetPanel(
                           tabBox(width = 12,
-                            tabPanel("Standart Modules", #begin tabset "CHECK"
+                            tabPanel("Standard Modules", #begin tabset "CHECK"
 #                                      fluidRow(
 #                                        shinyFiles::shinyFilesButton('file', 'File select', 'Please select a file',FALSE),
 #                                        shiny::actionButton("calculate", "Calculate",icon("play-circle-o")),
