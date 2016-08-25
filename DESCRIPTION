@@ -1,6 +1,6 @@
 Package: fbcheck
 Title: Web Interface for Data Quality and Processing
-Version: 1.0
+Version: 2.0
 Authors@R: c(
         person("Omar","Benites",,"obacc07@gmail.com",c("aut","cre"))
         )
