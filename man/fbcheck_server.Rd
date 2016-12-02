@@ -2,8 +2,7 @@
 % Please edit documentation in R/fbcheck_server.R
 \name{fbcheck_server}
 \alias{fbcheck_server}
-\title{Server component for traittools
-Returns server side components}
+\title{Server component for traittools in fbcheck}
 \usage{
 fbcheck_server(input, output, session, values)
 }
@@ -17,7 +16,6 @@ fbcheck_server(input, output, session, values)
 \item{values}{The reactive values}
 }
 \description{
-Server component for traittools
 Returns server side components
 }
 \author{

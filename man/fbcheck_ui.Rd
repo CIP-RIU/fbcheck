@@ -11,7 +11,7 @@ fbcheck_ui(type = "tab", title = "Data Quality and Processing",
 \arguments{
 \item{type}{type of UI element, deault is a tab in a shinydashboard}
 
-\item{title}{diaply title name}
+\item{title}{display title name}
 
 \item{name}{UI TabName}
 }

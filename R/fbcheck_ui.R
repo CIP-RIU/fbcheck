@@ -2,7 +2,7 @@
 #' Returns user friendly ui
 #' @author Omar Benites
 #' @param type type of UI element, deault is a tab in a shinydashboard
-#' @param title diaply title name
+#' @param title display title name
 #' @param name UI TabName
 #' @export
 
@@ -45,68 +45,68 @@ fbcheck_ui <- function(type="tab", title="Data Quality and Processing", name="da
                                      
                             )
                               
-                            # ,#end tab Panel "CHECK"
+                             ,#end tab Panel "CHECK"
       
 
 #### Hiden Special Modules during September Preview Release -----------------
 
-# 
-#                            tabPanel("Special Modules", #begin Trait List Panel"
+
+                           tabPanel("Special Modules", #begin Trait List Panel"
+                                     fluidRow(
+                                         shinydashboard::tabBox(
+                                           title = "PVS",
+                                           # The id lets us use input$tabset1 on the server to find the current tab
+
+                                           id = "tabset1", width = "2400px",
+
+                                           tabPanel("Sel_Criteria","Selection Criterias",
+                                                    br(),
+                                                    shinyTree::shinyTree("fbcheckSelect_criteria",search = TRUE,checkbox = TRUE)
+                                                    ),
+
+                                           tabPanel("Form_1","Selection Criterias",
+                                                   shinydashboard::box(rHandsontableOutput("hot_f1_btable",height = "1400px",width = "1400px"),
+                                                                       height = "3400px",width ="3400px")),
+
+                                           tabPanel("Form_2","Select Clones at Flowering Stage",
+                                                    shinydashboard::box(rHandsontableOutput("hot_f2_btable",height = "1400px",width = "1400px"),
+                                                                        height = "3400px",width ="2400px")),
+
+                                           tabPanel("Form_3","Select Clones at Harvest Stage",
+                                                    shinydashboard::box(rHandsontableOutput("hot_f3_btable",height = "1400px",width = "1400px"),
+                                                                        height = "3400px",width ="2400px")),
+
+                                           tabPanel("Form_4","Harvest Mother",
+                                                    shinydashboard::box(rHandsontableOutput("hot_f4_btable",height = "1400px",width = "1400px"),
+                                                                        height = "3400px",width ="2400px")),
+
+                                           tabPanel("Form_5","Harvest Baby",
+                                                    shinydashboard::box(rHandsontableOutput("hot_f5_btable",height = "1400px",width = "1400px"),
+                                                                        height = "3400px",width ="2400px")),
+
+                                           tabPanel("Form_6","Organoleptic_mother",
+                                                    shinydashboard::box(rHandsontableOutput("hot_f6_btable",height = "1400px",width = "1400px"),
+                                                                        height = "3400px",width ="2400px")),
+
+                                           tabPanel("Form_7","Organoleptic_mother",
+                                                    shinydashboard::box(rHandsontableOutput("hot_f7_btable",height = "1400px",width = "1400px"),
+                                                                        height = "3400px",width ="2400px")),
+
+                                           tabPanel("Form_8","Dormancy",
+                                                    shinydashboard::box(rHandsontableOutput("hot_f8_btable",height = "1400px",width = "1400px"),
+                                                                        height = "3400px",width ="2400px")),
+
+                                           tabPanel("Form_9","Storage",
+                                                    shinydashboard::box(rHandsontableOutput("hot_f9_btable",height = "1400px",width = "1400px"),
+                                                                        height = "3400px",width ="2400px"))
+
+                                         )
+                                     )
 #                                      fluidRow(
-#                                          shinydashboard::tabBox(
-#                                            title = "PVS",
-#                                            # The id lets us use input$tabset1 on the server to find the current tab
-#                                            
-#                                            id = "tabset1", width = "2400px",
-#                                            
-#                                            tabPanel("Sel_Criteria","Selection Criterias", 
-#                                                     br(),
-#                                                     shinyTree::shinyTree("fbcheckSelect_criteria",search = TRUE,checkbox = TRUE)
-#                                                     ),
-#                                            
-#                                            tabPanel("Form_1","Selection Criterias", 
-#                                                    shinydashboard::box(rHandsontableOutput("hot_f1_btable",height = "1400px",width = "1400px"),
-#                                                                        height = "3400px",width ="3400px")),
-#                                            
-#                                            tabPanel("Form_2","Select Clones at Flowering Stage", 
-#                                                     shinydashboard::box(rHandsontableOutput("hot_f2_btable",height = "1400px",width = "1400px"),
-#                                                                         height = "3400px",width ="2400px")),
-#                                            
-#                                            tabPanel("Form_3","Select Clones at Harvest Stage", 
-#                                                     shinydashboard::box(rHandsontableOutput("hot_f3_btable",height = "1400px",width = "1400px"),
-#                                                                         height = "3400px",width ="2400px")),
-#                                            
-#                                            tabPanel("Form_4","Harvest Mother", 
-#                                                     shinydashboard::box(rHandsontableOutput("hot_f4_btable",height = "1400px",width = "1400px"),
-#                                                                         height = "3400px",width ="2400px")),
-#                                            
-#                                            tabPanel("Form_5","Harvest Baby", 
-#                                                     shinydashboard::box(rHandsontableOutput("hot_f5_btable",height = "1400px",width = "1400px"),
-#                                                                         height = "3400px",width ="2400px")),
-#                                            
-#                                            tabPanel("Form_6","Organoleptic_mother", 
-#                                                     shinydashboard::box(rHandsontableOutput("hot_f6_btable",height = "1400px",width = "1400px"),
-#                                                                         height = "3400px",width ="2400px")),
-#                                            
-#                                            tabPanel("Form_7","Organoleptic_mother", 
-#                                                     shinydashboard::box(rHandsontableOutput("hot_f7_btable",height = "1400px",width = "1400px"),
-#                                                                         height = "3400px",width ="2400px")),
-#                                            
-#                                            tabPanel("Form_8","Dormancy", 
-#                                                     shinydashboard::box(rHandsontableOutput("hot_f8_btable",height = "1400px",width = "1400px"),
-#                                                                         height = "3400px",width ="2400px")),
-#                                            
-#                                            tabPanel("Form_9","Storage", 
-#                                                     shinydashboard::box(rHandsontableOutput("hot_f9_btable",height = "1400px",width = "1400px"),
-#                                                                         height = "3400px",width ="2400px"))
-# 
-#                                          )
-#                                      )
-# #                                      fluidRow(
-# #                                        box(rHandsontableOutput("hot_td_trait",height = "1400px",width = "1400px"),
-# #                                            height = "3400px",width ="2400px")
-# #                                      )#end fluidRow
-#                             )
+#                                        box(rHandsontableOutput("hot_td_trait",height = "1400px",width = "1400px"),
+#                                            height = "3400px",width ="2400px")
+#                                      )#end fluidRow
+                            )
 
 #### Hiden Special Modules during September Preview Release -----------------
 
