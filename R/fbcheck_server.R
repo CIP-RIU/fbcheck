@@ -792,14 +792,23 @@ fbcheck_server <- function(input, output, session, values) {
                        }
                      
                        wb <- openxlsx::loadWorkbook(hot_file) 
+                       print("sum mother -1")
                        form <- split_tidy_form(form = DF_f6)
+                       print("sum mother 0")
                        names_form <- names(form)
+                       print("sum mother 1")
+                       
                        out_table<- lapply(X = names_form, function(x) out_form_table(form[[x]])  )
-
+                       print("sum mother 2")
+                       
                        out_table <- rbindlist(out_table)
+                       print("sum mother 3")
                        out_table_f6 <- as.data.frame(out_table)
+                       print("sum mother 4")
                        
                        out_table_f6 <- out_table_f6 %>% map_at(c(2,3,4), as.numeric) %>% tbl_df()
+                       print("sum mother 5")
+                       
                        out_table_f6 <- as.data.frame(out_table_f6, stringsAsFactors =TRUE)    
                        print("summ mother table f6")
 
