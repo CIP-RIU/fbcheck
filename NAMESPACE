@@ -2,6 +2,12 @@
 
 export(fbcheck_server)
 export(fbcheck_ui)
+export(form_checker)
+export(form_parameters)
 export(get.fb.param)
+export(out_form_table)
 export(scale_trait)
+export(split_tidy_form)
 export(trait_type)
+export(x_form)
+export(x_values)

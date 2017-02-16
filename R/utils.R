@@ -126,8 +126,79 @@
 
 
 
+# Form checker ------------------------------------------------------------
+
+#' Organoleptic form checker
+#' @param form organoleptic form
+#' @param hot_file file path
+#' @description organoleptic forms sometimes has unconsistencies or typos that we must be care before processing.
+#' @author Omar Benites
+#' @export
+#' 
+
+form_checker <- function(form, hot_file){
+  
+  # case 1: all the tables has missing values
+  headers <- c("Number_of_panel", "Type_of_trial", "Name_of_Evaluator", "Sex", "APPEARANCE", "TASTE" ,"TEXTURE", NA, "NA")    
+  #Variable <- NULL
+  #remove all the header of each sub form.
+  form <- dplyr::filter(form,  Variable %in% headers)
+  form_bind <- dplyr::select(form, -1,-2,-3)
+  form_bind <- form_bind %>% tidyr::gather(instn, value, 1:ncol(form_bind)) #tranforming all in one column
+  
+  if(all(is.na(form_bind$value))){ #check if all values are NA missing values (logical values)
+    out <- NULL
+    
+  } 
+  else if (all(form_bind$value=="NA")){ #check if all values are "NA" characters
+    out <- NULL #
+    
+  } 
+  else {
+
+    wb <- openxlsx::loadWorkbook(hot_file) 
+    #form <- split_tidy_form(form = DF_f6) #deprecated. Just form outside function scope.
+    form <- split_tidy_form(form = form) #DF_f6 was changed by form argument
+    names_form <- names(form)
+    
+    out_table<- lapply(X = names_form, function(x) out_form_table(form[[x]])  )
+    print("sum mother 2")
+    
+    out_table <- data.table::rbindlist(out_table)
+    print(out_table)
+    print("sum mother 3")
+    out_table_fn <- as.data.frame(out_table)
+    
+    print("sum mother 4")
+    print(out_table_fn)
+   
+    print("sum mother 5.1")
+    out_table_fn <- out_table_fn %>% purrr::map_at(c(2,3,4), as.numeric) %>%  as.data.frame(.,stringsAsFactors =TRUE)
+    
+    print("sum mother 5.2")
+    print("summ mother table f6")
+    openxlsx::addWorksheet(wb = wb,sheetName = "summary_organoleptic_mother",gridLines = TRUE)
+    openxlsx::writeDataTable(wb,sheet = "summary_organoleptic_mother", x = out_table_fn, colNames = TRUE, keepNA = FALSE, withFilter = FALSE)
+ 
+    openxlsx::saveWorkbook(wb = wb, file = hot_file, overwrite = TRUE)
+    out <- out_table_fn
+    
+   }
+
+ out
+  
+}
+
+
+
 # Split the organoleptic forms into tidy forms structures -----------------
 
+#' Split organoleptic forms
+#' @param form organoleptic form
+#' @description split in tiny data frames all the orgaleptic forms
+#' @author Omar Benites
+#' @export
+#'
 split_tidy_form <- function(form){
   
   #headers are used to validate the right values
@@ -141,8 +212,13 @@ split_tidy_form <- function(form){
   fieldbook_data_form <- split(form_data,r)
 }
 
-# Row-bind of organoleptic forms
 
+#' output of the organoletic form in a table
+#' @param form organoleptic form
+#' @description return an organized table
+#' @author Omar Benites
+#' @export
+#'
 out_form_table <- function(form){
   
   split_form <- split_tidy_form(form)
@@ -150,7 +226,8 @@ out_form_table <- function(form){
   form <- tibble::as_data_frame(form)
   
   #Tranform data to tabular form
-  res <- gather(form, "INSTN", "Marks", 4:8)
+  ngen <- ncol(form) #number of evaluated genotyoes (cipnumber or variety) evaluated in organoleptic form
+  res <- gather(form, "INSTN", "Marks", 4:ngen)
   
   #---- Extraction of the following parameters:  (1) Name of evaluator
   # (1) Name of evaluator, # (2) Type_of_trial , # (3) Name_of_Evaluator and (4) Sex
@@ -164,7 +241,9 @@ out_form_table <- function(form){
   Sex <- org_params$Sex
   
   #---- Extract x mark data (organoleptic votes for each variety)
-  org_marks <- res %>% filter( Variable %in% c("APPEARANCE","TASTE","TEXTURE","NA") )
+  # Se agrego "NA" y NA para que filtre con esos valores. Hay algunos vectores que continene NA en forma de caracter o logico 
+  # (sin comillas)
+  org_marks <- res %>% filter(Variable %in% c("APPEARANCE","TASTE","TEXTURE","NA",NA))
   
   #the number of genotypes gives us the number of repetation per block
   nrow_org_marks <- n_distinct(org_marks$INSTN)
@@ -176,22 +255,37 @@ out_form_table <- function(form){
   
   ##### BEGIN  TEST  Add test: number of "x" in organoleptic form number '#'
   org_marks <- mutate(org_marks, Marks = tolower(Marks))
+  
   #number of real and hipotetical x marks counted in organoleptic forms.
   real_n_xmarks <- org_marks %>% select(Marks) %>% str_count(pattern = "x") 
   hipo_n_xmarks <- nrow_org_marks*3 
   if(real_n_xmarks == hipo_n_xmarks) {
-    print("continue")
+    message <- paste("continue")
   } else {
-    print("One value(s) is missing in the organoleptic form")
+    message <- paste("One value(s) is missing in the organoleptic form")
   }
   ##### END OF TEST 
+  
+  #extracting genotype names
+  geno_names <- unique(org_marks$INSTN)
   
   #Replace the older variable name by org_vars values
   org_marks <- mutate(org_marks, Variable = org_vars) %>%
     filter(Marks %in% c('x',"X")) %>%
     select(-Marks,-Attributes)  
   
-  org_marks <- org_marks %>% spread(Variable, Grade) %>% mutate(PanelNo, Sex)
+  #Data transformation for analysis
+  org_marks_table <- org_marks %>% spread(Variable, Grade) %>% mutate(PanelNo, Sex)
+  
+  
+  #If one genotypes have missing data, this code automatically auto-complete the orgaleptic tidy form
+  if(any(geno_names %in% org_marks$INSTN == FALSE)){
+    out_geno <- setdiff(geno_names, org_marks_table$INSTN)
+    out_geno <- data.frame(INSTN = out_geno, APPEARANCE=NA, TASTE=NA, TEXTURE=NA, PanelNo = PanelNo, Sex = Sex )
+    org_marks_table<- rbind(org_marks_table, out_geno)
+  }
+  
+  org_marks_table
   
   
 }
@@ -199,10 +293,28 @@ out_form_table <- function(form){
 
 # list_form <- split_tidy_form(form) -----------------
 
-# Return 'x' values (marks made by farmers in organoleptic forms) -----------------
+#' Return 'x' values (marks made by farmers in organoleptic forms)
+#' @param vec vector
+#' @param values categorical values or scales
+#' @description get the x values from organoleptic forms
+#' @author Omar Benites
+#' @export
+#' 
 x_values <- function(vec,values){values[!is.na(vec)]}
 
-# Return the form with marks -----------------
+
+
+#' Get x values from PVS forms
+#'
+#' @param form pvs form
+#' @param genotypes genotypes
+#' @param name_panel the panelist name
+#' @param n_panel the number of panelist
+#' @param sex_panel the sex of the panelist
+#' @author Omar Benites
+#' @description Return the form with x marks
+#' @export
+#' 
 x_form <- function(form, genotypes = NA, name_panel=NA, n_panel=NA, sex_panel=NA){ 
   
   val <- c(5,3,1,5,3,1,5,3,1)
@@ -245,6 +357,16 @@ x_form <- function(form, genotypes = NA, name_panel=NA, n_panel=NA, sex_panel=NA
 # }
 
 # Return all the parameters values which are included into organoleptic forms -----------------
+
+
+
+#' Get form parameters from PVS forms
+#'
+#' @param list_form list of forms
+#' @author Omar Benites
+#' @description Return pvs form parameters
+#' @export
+#' 
 form_parameters <- function(list_form) {
   
   list(
@@ -273,3 +395,5 @@ form_parameters <- function(list_form) {
 #   
 # }
 # 
+
+

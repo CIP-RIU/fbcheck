@@ -20,7 +20,11 @@ Imports:
     shiny,
     sbformula,
     data.table,
-    date
+    date,
+    purrr,
+    tidyr,
+    dplyr
 License: MIT + file LICENCE
 LazyData: true
 RoxygenNote: 5.0.1
+Suggests: testthat

@@ -210,7 +210,21 @@ fbcheck_server <- function(input, output, session, values) {
     out
   })
 
+  pvs_fb_sheets <- reactive({
+    hot_file <- hot_path()
+    pvs_sheet <- readxl::excel_sheets(hot_file)
+    pvs_sheet
+    
+  })  
+  
   #The Selection Criteria Fieldbook 1
+  # pvs_sheet_list <- c("F1_selection_criteria", "F2_select_clones_flowering", "F3_select_clones_harvest",
+  #                     "F4_harvest_mother" ,
+  #                     "F5_harvest_baby", "F6_organoleptic_mother",
+  #                     "F7_organoleptic_baby", "F8_postharvest_dormancy",
+  #                     "F9_postharvest_clones_storage")
+   
+  
   output$hot_f1_btable  <-  renderRHandsontable({
 
     values  <-  shiny::reactiveValues(
@@ -244,14 +258,16 @@ fbcheck_server <- function(input, output, session, values) {
     if(!is.null(DF)){
       # DF
                  traits <- get_trait_fb(DF)
-                 saveRDS(DF,"hot_f1_fieldbook.rds")
-                 crop <- hot_crop()
-      #           trial <- hot_trial()
-      #
-      #           trait_dict <- get_crop_ontology(crop = crop,trial = trial)
-                 #trait_dict <- get_crop_ontology(crop = crop)
-                  #traittools::col_render_trait(fieldbook = DF,trait = traits ,trait_dict = trait_dict)
-      rhandsontable::rhandsontable(data = DF,width = 2000)
+                 
+                 if(!is.element("F1_selection_criteria", pvs_fb_sheets())){
+                   DF <- data.frame()
+                   saveRDS(DF, "hot_f1_fieldbook.rds")
+                 } else {
+                   saveRDS(DF,"hot_f1_fieldbook.rds")
+                 }
+                     
+                  crop <- hot_crop()
+                  rhandsontable::rhandsontable(data = DF, width = 2000)
     }
 
   })
@@ -274,29 +290,28 @@ fbcheck_server <- function(input, output, session, values) {
 
     if(input$calculate>0){
 
-      #hot_plot_size <- as.numeric(hot_params()$hot_plot_size)
-
-      #hot_plant_den <- as.numeric(hot_params()$hot_plant_den)
-
       DF = values[["hot_f2_btable"]]
       DF <- as.data.frame(DF)
 
-      #calculate_form_sclones
-      #DF <- calculate_trait_variables(fb = DF,plot_size = hot_plot_size,
-      #                                      plant_den = hot_plant_den,mgt = hot_mgt(),mtl=hot_mtl(),trial_type=hot_trial())
       DF <- calculate_form_sclones(data = DF)
     }
 
         if(!is.null(DF)){
-          #DF
+         
            traits <- get_trait_fb(DF)
-           saveRDS(DF,"hot_f2_fieldbook.rds")
-           crop <- hot_crop()
-#           trial <- hot_trial()
-#
-           #trait_dict <- get_crop_ontology(crop = crop,trial = trial)
-           trait_dict <- get_crop_ontology(crop = crop)
-           traittools::col_render_trait(fieldbook = DF, trait = traits, trait_dict = trait_dict)
+           
+           if(!is.element("F2_select_clones_flowering", pvs_fb_sheets())){
+             DF <- data.frame()
+             saveRDS(DF, "hot_f2_fieldbook.rds")
+             rhandsontable::rhandsontable(data = DF, width = 2000)
+           } else {
+             saveRDS(DF, "hot_f2_fieldbook.rds")
+             crop <- hot_crop()
+             trait_dict <- get_crop_ontology(crop = crop)
+             traittools::col_render_trait(fieldbook = DF, trait = traits, trait_dict = trait_dict)
+           }
+           
+
            #rhandsontable::rhandsontable(data = DF) %>%  rhandsontable::hot_cols("MSM",allowInvalid = TRUE)
         }
 
@@ -320,30 +335,29 @@ fbcheck_server <- function(input, output, session, values) {
 
     if(input$calculate>0){
 
-      #hot_plot_size <- as.numeric(hot_params()$hot_plot_size)
-
-      #hot_plant_den <- as.numeric(hot_params()$hot_plant_den)
-
       DF = values[["hot_f3_btable"]]
       DF <- as.data.frame(DF)
 
-      #calculate_form_sclones
-      #DF <- calculate_trait_variables(fb = DF,plot_size = hot_plot_size,
-      #                                      plant_den = hot_plant_den,mgt = hot_mgt(),mtl=hot_mtl(),trial_type=hot_trial())
       DF <- calculate_form_sclones(data = DF)
     }
 
     if(!is.null(DF)){
-      #DF
+      
                  traits <- get_trait_fb(DF)
-      saveRDS(DF,"hot_f3_fieldbook.rds")
-                  crop <- hot_crop()
-      #           trial <- hot_trial()
-      #
-                 #trait_dict <- get_crop_ontology(crop = crop,trial = trial)
-                 trait_dict <- get_crop_ontology(crop = crop)
-                 traittools::col_render_trait(fieldbook = DF,trait = traits ,trait_dict = trait_dict)
-      #rhandsontable::rhandsontable(data = DF) %>%  rhandsontable::hot_cols("MSM",allowInvalid = TRUE)
+                 
+                 if(!is.element("F3_select_clones_harvest", pvs_fb_sheets())){
+                   DF <- data.frame()
+                   saveRDS(DF, "hot_f3_fieldbook.rds")
+                   rhandsontable::rhandsontable(data = DF, width = 2000)
+                   
+                 } else {
+                   saveRDS(DF, "hot_f3_fieldbook.rds")
+                   crop <- hot_crop()
+                   trait_dict <- get_crop_ontology(crop = crop)
+                   traittools::col_render_trait(fieldbook = DF, trait = traits , trait_dict = trait_dict)
+                 } 
+                  
+                
     }
 
   })
@@ -373,23 +387,26 @@ fbcheck_server <- function(input, output, session, values) {
       DF = values[["hot_f4_btable"]]
       DF <- as.data.frame(DF)
 
-      #calculate_form_sclones
-      #DF <- calculate_trait_variables(fb = DF,plot_size = hot_plot_size,
-      #                                      plant_den = hot_plant_den,mgt = hot_mgt(),mtl=hot_mtl(),trial_type=hot_trial())
       DF <- calculate_form_harvest(data = DF, plot_size = hot_plot_size, plant_den = hot_plant_den)
     }
 
     if(!is.null(DF)){
-      #DF
+    
                  traits <- get_trait_fb(DF)
-      saveRDS(DF,"hot_f4_fieldbook.rds")
-                  crop <- hot_crop()
-      #           trial <- hot_trial()
-      #
-                 #trait_dict <- get_crop_ontology(crop = crop,trial = trial)
-                 trait_dict <- get_crop_ontology(crop = crop)
-                 traittools::col_render_trait(fieldbook = DF,trait = traits ,trait_dict = trait_dict)
-      #rhandsontable::rhandsontable(data = DF)
+                 
+                 if(!is.element("F4_harvest_mother", pvs_fb_sheets())){
+                   DF <- data.frame()
+                   saveRDS(DF, "hot_f4_fieldbook.rds")
+                   rhandsontable::rhandsontable(data = DF, width = 2000)
+                 } else {
+                   saveRDS(DF,"hot_f4_fieldbook.rds")
+                   crop <- hot_crop()
+                   trait_dict <- get_crop_ontology(crop = crop)
+                   traittools::col_render_trait(fieldbook = DF, trait = traits, trait_dict = trait_dict)
+                 }   
+                 
+               
+
     }
 
   })
@@ -413,29 +430,32 @@ fbcheck_server <- function(input, output, session, values) {
     if(input$calculate>0){
 
       hot_plot_size <- as.numeric(hot_params()$hot_plot_size)
-
       hot_plant_den <- as.numeric(hot_params()$hot_plant_den)
 
       DF = values[["hot_f5_btable"]]
       DF <- as.data.frame(DF)
 
-      #calculate_form_sclones
-      #DF <- calculate_trait_variables(fb = DF,plot_size = hot_plot_size,
-      #                                      plant_den = hot_plant_den,mgt = hot_mgt(),mtl=hot_mtl(),trial_type=hot_trial())
       DF <- calculate_form_harvest(data = DF, plot_size = hot_plot_size, plant_den = hot_plant_den)
     }
 
     if(!is.null(DF)){
-      #DF
-                 traits <- get_trait_fb(DF)
-       saveRDS(DF,"hot_f5_fieldbook.rds")
-                  crop <- hot_crop()
-      #           trial <- hot_trial()
-      #
-      #           trait_dict <- get_crop_ontology(crop = crop,trial = trial)
-                  trait_dict <- get_crop_ontology(crop = crop)
-                  traittools::col_render_trait(fieldbook = DF,trait = traits ,trait_dict = trait_dict)
-      # rhandsontable::rhandsontable(data = DF)
+
+                  traits <- get_trait_fb(DF)
+                 
+                  
+                  if(!is.element("F5_harvest_baby", pvs_fb_sheets())){
+                    DF <- data.frame()
+                    saveRDS(DF, "hot_f5_fieldbook.rds")
+                    rhandsontable::rhandsontable(data = DF, width = 2000)
+                    
+                  } else {
+                    saveRDS(DF,"hot_f5_fieldbook.rds")
+                    crop <- hot_crop()
+                    trait_dict <- get_crop_ontology(crop = crop)
+                    traittools::col_render_trait(fieldbook = DF,trait = traits ,trait_dict = trait_dict)
+                  }  
+                  
+                 
     }
 
   })
@@ -465,22 +485,18 @@ fbcheck_server <- function(input, output, session, values) {
       DF = values[["hot_f6_btable"]]
       DF <- as.data.frame(DF)
 
-      #calculate_form_sclones
-      #DF <- calculate_trait_variables(fb = DF,plot_size = hot_plot_size,
-      #                                      plant_den = hot_plant_den,mgt = hot_mgt(),mtl=hot_mtl(),trial_type=hot_trial())
-      #DF <- calculate_form_harvest(data = DF, plot_size = hot_plot_size, plant_den = hot_plant_den)
-    }
+      }
 
     if(!is.null(DF)){
-      #DF
-      #traits <- get_trait_fb(DF)
-       saveRDS(DF,"hot_f6_fieldbook.rds")
-      #crop <- hot_crop()
-      #           trial <- hot_trial()
-      #
-      #           trait_dict <- get_crop_ontology(crop = crop,trial = trial)
-      #trait_dict <- get_crop_ontology(crop = crop)
-      #traittools::col_render_trait(fieldbook = DF,trait = traits ,trait_dict = trait_dict)
+      
+      if(!is.element("F6_organoleptic_mother", pvs_fb_sheets())){
+        DF <- data.frame()
+        saveRDS(DF, "hot_f6_fieldbook.rds")
+      } else {
+        saveRDS(DF,"hot_f6_fieldbook.rds")
+      }
+      
+      
       rhandsontable::rhandsontable(data = DF)
     }
 
@@ -511,23 +527,18 @@ fbcheck_server <- function(input, output, session, values) {
       DF = values[["hot_f7_btable"]]
       DF <- as.data.frame(DF)
 
-      #calculate_form_sclones
-      #DF <- calculate_trait_variables(fb = DF,plot_size = hot_plot_size,
-      #                                      plant_den = hot_plant_den,mgt = hot_mgt(),mtl=hot_mtl(),trial_type=hot_trial())
-      #DF <- calculate_form_harvest(data = DF, plot_size = hot_plot_size, plant_den = hot_plant_den)
-    }
+      }
 
     if(!is.null(DF)){
-      #DF
-      #traits <- get_trait_fb(DF)
-       saveRDS(DF,"hot_f7_fieldbook.rds")
-      #crop <- hot_crop()
-      #           trial <- hot_trial()
-      #
-      #           trait_dict <- get_crop_ontology(crop = crop,trial = trial)
-      #trait_dict <- get_crop_ontology(crop = crop)
-      #traittools::col_render_trait(fieldbook = DF,trait = traits ,trait_dict = trait_dict)
-      rhandsontable::rhandsontable(data = DF)
+       
+        if(!is.element("F7_organoleptic_baby", pvs_fb_sheets())){
+          DF <-data.frame()
+          saveRDS(DF, "hot_f7_fieldbook.rds")
+        }  else {
+          saveRDS(DF,"hot_f7_fieldbook.rds")
+        }
+      
+        rhandsontable::rhandsontable(data = DF)
     }
 
   })
@@ -550,28 +561,20 @@ fbcheck_server <- function(input, output, session, values) {
 
     if(input$calculate>0){
 
-      #hot_plot_size <- as.numeric(hot_params()$hot_plot_size)
-
-      #hot_plant_den <- as.numeric(hot_params()$hot_plant_den)
-
       DF = values[["hot_f8_btable"]]
       DF <- as.data.frame(DF)
 
-      #calculate_form_sclones
-      #DF <- calculate_trait_variables(fb = DF,plot_size = hot_plot_size,
-      #                                      plant_den = hot_plant_den,mgt = hot_mgt(),mtl=hot_mtl(),trial_type=hot_trial())
       DF <- calculate_form_dormancy(data = DF)
     }
 
     if(!is.null(DF)){
-      #DF
-      #           traits <- get_trait_fb(DF)
-      saveRDS(DF,"hot_f8_fieldbook.rds")
-      #           crop <- hot_crop()
-      #           trial <- hot_trial()
-      #
-      #           trait_dict <- get_crop_ontology(crop = crop,trial = trial)
-      #           traittools::col_render_trait(fieldbook = DF,trait = traits ,trait_dict = trait_dict)
+    
+      if(!is.element("F8_postharvest_dormancy", pvs_fb_sheets())){
+        DF <- data.frame()
+        saveRDS(DF, "hot_f8_fieldbook.rds")
+      }  else {
+        saveRDS(DF,"hot_f8_fieldbook.rds")
+      }
       rhandsontable::rhandsontable(data = DF)
     }
 
@@ -595,29 +598,19 @@ fbcheck_server <- function(input, output, session, values) {
 
     if(input$calculate>0){
 
-      #hot_plot_size <- as.numeric(hot_params()$hot_plot_size)
-
-      #hot_plant_den <- as.numeric(hot_params()$hot_plant_den)
-
       DF = values[["hot_f9_btable"]]
       DF <- as.data.frame(DF)
-
-      #calculate_form_sclones
-      #DF <- calculate_trait_variables(fb = DF,plot_size = hot_plot_size,
-      #                                      plant_den = hot_plant_den,mgt = hot_mgt(),mtl=hot_mtl(),trial_type=hot_trial())
       DF <- calculate_form_postharvest(data = DF)
     }
 
     if(!is.null(DF)){
-      #DF
-      #           traits <- get_trait_fb(DF)
-      saveRDS(DF,"hot_f9_fieldbook.rds")
-      #           crop <- hot_crop()
-      #           trial <- hot_trial()
-      #
-      #           trait_dict <- get_crop_ontology(crop = crop,trial = trial)
-      #           traittools::col_render_trait(fieldbook = DF,trait = traits ,trait_dict = trait_dict)
-      rhandsontable::rhandsontable(data = DF)
+       if(!is.element("F9_postharvest_clones_storage", pvs_fb_sheets())){
+         DF <- data.frame()
+         saveRDS(DF, "hot_f9_fieldbook.rds")
+       } else {
+         saveRDS(DF,"hot_f9_fieldbook.rds")
+       }
+       rhandsontable::rhandsontable(data = DF)
     }
 
   })
@@ -630,7 +623,7 @@ fbcheck_server <- function(input, output, session, values) {
 
   #Export button: This event export and show the excel file which has been checked out.
   shiny::observeEvent(input$exportButton,{
-
+ 
     #Begin Try
     try({
 
@@ -642,32 +635,24 @@ fbcheck_server <- function(input, output, session, values) {
                    trial <- hot_trial()
 
                    if(crop == "potato"){
-                      #trait_dict <- td_potato
-                      trait_dict2 <- table_module_potato
+                     trait_dict2 <- table_module_potato
                    }
 
                    if(crop == "sweetpotato"){
-                      #trait_dict <- td_sweetpotato
-                      trait_dict2 <- table_module_sweetpotato
+                     trait_dict2 <- table_module_sweetpotato
                    }
 
                    trait_dict <- trait_dict2
-                    #print("DF")
+                 
+                  if(hot_trial()=="Participatory Varietal Selection"){
 
-                   if(hot_trial()=="Participatory Varietal Selection"){
-
-                     trait_dict <-  table_module_potato
+                     trait_dict <- table_module_potato
                      hot_design <- as.character(hot_params()$hot_design)
 
                      hot_file <- hot_path()
-                    # wb <- openxlsx::loadWorkbook(hot_file)
-                     #sheets <- readxl::excel_sheets(path = hot_file)
-
-                     #special_data_files <- list.files()
-
+                 
                      pvs_sheet_list <- c("F1_selection_criteria", "F2_select_clones_flowering", "F3_select_clones_harvest",
-                                         "F4_harvest_mother" ,
-                                         "F5_harvest_baby", "F6_organoleptic_mother",
+                                         "F4_harvest_mother" , "F5_harvest_baby", "F6_organoleptic_mother",
                                          "F7_organoleptic_baby", "F8_postharvest_dormancy",
                                          "F9_postharvest_clones_storage")
                      print("f1")
@@ -676,7 +661,9 @@ fbcheck_server <- function(input, output, session, values) {
                      #fb_sheets <- fb_sheets[fb_sheets %in% pvs_sheet_list]
 
                      print("f1")
+                     
                      if(is.element(pvs_sheet_list[1], pvs_sheet)){
+                       
                        wb <- openxlsx::loadWorkbook(hot_file)
                        DF_f1 <- readRDS("hot_f1_fieldbook.rds")
                        openxlsx::removeWorksheet(wb, pvs_sheet_list[1])
@@ -684,23 +671,28 @@ fbcheck_server <- function(input, output, session, values) {
                        openxlsx::addWorksheet(wb = wb,sheetName = "F1_selection_criteria",gridLines = TRUE)
                        openxlsx::writeDataTable(wb,sheet = "F1_selection_criteria", x = DF_f1,colNames = TRUE, withFilter = FALSE)
                        openxlsx::saveWorkbook(wb = wb, file = hot_file, overwrite = TRUE)
+                     } else {
+                       DF_f1 <- NULL
                      }
 
                      print("f2")
                      if(is.element(pvs_sheet_list[2], pvs_sheet)){
+                       
                        wb <- openxlsx::loadWorkbook(hot_file)
                        DF_f2 <- readRDS("hot_f2_fieldbook.rds")
                        trait_f2 <- get_trait_fb(DF_f2)
                        openxlsx::removeWorksheet(wb, pvs_sheet_list[2])
 
-
                        openxlsx::addWorksheet(wb = wb,sheetName = "F2_select_clones_flowering",gridLines = TRUE)
                        openxlsx::writeDataTable(wb,sheet = "F2_select_clones_flowering", x = DF_f2, colNames = TRUE, withFilter = FALSE)
                        openxlsx::saveWorkbook(wb = wb, file = hot_file, overwrite = TRUE)
+                     } else {
+                       DF_f2 <- NULL
                      }
 
                      print("f3")
                      if(is.element(pvs_sheet_list[3], pvs_sheet)){
+                       
                        wb <- openxlsx::loadWorkbook(hot_file)
                        DF_f3 <- readRDS("hot_f3_fieldbook.rds")
                        trait_f3 <- get_trait_fb(DF_f3)
@@ -709,6 +701,8 @@ fbcheck_server <- function(input, output, session, values) {
                        openxlsx::addWorksheet(wb = wb,sheetName = "F3_select_clones_harvest",gridLines = TRUE)
                        openxlsx::writeDataTable(wb,sheet = "F3_select_clones_harvest", x = DF_f3, colNames = TRUE, withFilter = FALSE)
                        openxlsx::saveWorkbook(wb = wb, file = hot_file, overwrite = TRUE)
+                     }else {
+                       DF_f3 <- NULL
                      }
 
                      print("f4")
@@ -721,10 +715,13 @@ fbcheck_server <- function(input, output, session, values) {
                        openxlsx::addWorksheet(wb = wb,sheetName = "F4_harvest_mother",gridLines = TRUE)
                        openxlsx::writeDataTable(wb,sheet = "F4_harvest_mother", x = DF_f4, colNames = TRUE, withFilter = FALSE)
                        openxlsx::saveWorkbook(wb = wb, file = hot_file, overwrite = TRUE)
+                     } else {
+                       DF_f4 <- NULL
                      }
 
                      print("f5")
                      if(is.element(pvs_sheet_list[5], pvs_sheet)){
+                       
                        wb <- openxlsx::loadWorkbook(hot_file)
                        DF_f5 <- readRDS("hot_f5_fieldbook.rds")
                        trait_f5 <- get_trait_fb(DF_f5)
@@ -734,10 +731,13 @@ fbcheck_server <- function(input, output, session, values) {
                        openxlsx::addWorksheet(wb = wb,sheetName = "F5_harvest_baby",gridLines = TRUE)
                        openxlsx::writeDataTable(wb,sheet = "F5_harvest_baby", x = DF_f5,colNames = TRUE, withFilter = FALSE)
                        openxlsx::saveWorkbook(wb = wb, file = hot_file, overwrite = TRUE)
+                     } else {
+                       DF_f5 <- NULL
                      }
 
                      print("f6")
                      if(is.element(pvs_sheet_list[6], pvs_sheet)){
+                       
                        wb <- openxlsx::loadWorkbook(hot_file)
                        DF_f6 <- readRDS("hot_f6_fieldbook.rds")
                        #trait_f6 <- get_trait_fb(DF_f6)
@@ -745,42 +745,55 @@ fbcheck_server <- function(input, output, session, values) {
 
 
                        openxlsx::addWorksheet(wb = wb,sheetName = "F6_organoleptic_mother",gridLines = TRUE)
-                       openxlsx::writeDataTable(wb,sheet = "F6_organoleptic_mother", x = DF_f6,colNames = TRUE, withFilter = FALSE,keepNA = FALSE)
+                       openxlsx::writeDataTable(wb,sheet = "F6_organoleptic_mother", x = DF_f6, colNames = TRUE, withFilter = FALSE)
                        openxlsx::saveWorkbook(wb = wb, file = hot_file, overwrite = TRUE)
+                     } else {
+                       DF_f6 <- NULL
                      }
 
                      print("f7")
                      if(is.element(pvs_sheet_list[7], pvs_sheet)){
+                       
                        wb <- openxlsx::loadWorkbook(hot_file)
                        DF_f7 <- readRDS("hot_f7_fieldbook.rds")
                        #trait_f2 <- get_trait_fb(DF_f2)
                        openxlsx::removeWorksheet(wb, pvs_sheet_list[7])
 
                        openxlsx::addWorksheet(wb = wb,sheetName = "F7_organoleptic_baby",gridLines = TRUE)
-                       openxlsx::writeDataTable(wb,sheet = "F7_organoleptic_baby", x = DF_f7,colNames = TRUE, withFilter = FALSE, keepNA = FALSE)
+                       openxlsx::writeDataTable(wb,sheet = "F7_organoleptic_baby", x = DF_f7,colNames = TRUE, withFilter = FALSE)
                        openxlsx::saveWorkbook(wb = wb, file = hot_file, overwrite = TRUE)
+                     } else {
+                       DF_f7 <- NULL
                      }
 
                      print("f8")
                      if(is.element(pvs_sheet_list[8], pvs_sheet)){
+                       
                        wb <- openxlsx::loadWorkbook(hot_file)
                        DF_f8 <- readRDS("hot_f8_fieldbook.rds")
                        openxlsx::removeWorksheet(wb, pvs_sheet_list[8])
-
+                       trait_f8 <- get_trait_fb(DF_f8)
+                       
                        openxlsx::addWorksheet(wb = wb,sheetName = "F8_postharvest_dormancy",gridLines = TRUE)
                        openxlsx::writeDataTable(wb,sheet = "F8_postharvest_dormancy", x = DF_f8,colNames = TRUE, withFilter = FALSE)
                        openxlsx::saveWorkbook(wb = wb, file = hot_file, overwrite = TRUE)
+                     } else {
+                       DF_f8 <- NULL
                      }
 
                      print("f9")
                      if(is.element(pvs_sheet_list[9], pvs_sheet)){
+                       
                        wb <- openxlsx::loadWorkbook(hot_file)
                        DF_f9 <- readRDS("hot_f9_fieldbook.rds")
                        openxlsx::removeWorksheet(wb, pvs_sheet_list[9])
-
+                       #trait_f9 <- get_trait_fb(DF_f9)    
+                       
                        openxlsx::addWorksheet(wb = wb,sheetName = "F9_postharvest_clones_storage",gridLines = TRUE)
-                       openxlsx::writeDataTable(wb,sheet = "F9_postharvest_clones_storage", x = DF_f9,colNames = TRUE, withFilter = FALSE)
+                       openxlsx::writeDataTable(wb,sheet = "F9_postharvest_clones_storage", x = DF_f9, colNames = TRUE, withFilter = FALSE)
                        openxlsx::saveWorkbook(wb = wb, file = hot_file, overwrite = TRUE)
+                     } else {
+                       DF_f9 <- NULL
                      }
 
                      print("sum mother")
@@ -791,59 +804,82 @@ fbcheck_server <- function(input, output, session, values) {
                          openxlsx::saveWorkbook(wb = wb, file = hot_file, overwrite = TRUE)
                        }
                      
-                       wb <- openxlsx::loadWorkbook(hot_file) 
-                       print("sum mother -1")
-                       form <- split_tidy_form(form = DF_f6)
-                       print("sum mother 0")
-                       names_form <- names(form)
-                       print("sum mother 1")
+                     if(is.element(pvs_sheet_list[6], pvs_sheet)){
                        
-                       out_table<- lapply(X = names_form, function(x) out_form_table(form[[x]])  )
-                       print("sum mother 2")
+                       out_table_f6 <- form_checker(form = DF_f6, hot_file = hot_file)
                        
-                       out_table <- rbindlist(out_table)
-                       print("sum mother 3")
-                       out_table_f6 <- as.data.frame(out_table)
-                       print("sum mother 4")
+                      #  wb <- openxlsx::loadWorkbook(hot_file)
+                      # # print("sum mother -1")
+                      #  form <- split_tidy_form(form = DF_f6)
+                      # # print("sum mother 0")
+                      #  names_form <- names(form)
+                      #  #print("sum mother 1")
+                      # 
+                      #  out_table<- lapply(X = names_form, function(x) out_form_table(form[[x]])  )
+                      #  print("sum mother 2")
+                      # 
+                      #  out_table <- data.table::rbindlist(out_table)
+                      #  print(out_table)
+                      #  print("sum mother 3")
+                      #  out_table_f6 <- as.data.frame(out_table)
+                      # 
+                      #  print("sum mother 4")
+                      #  print(out_table_f6)
+                      #  # str(out_table_f6)
+                      #  print("sum mother 5.1")
+                      # 
+                      #  #out_table_f6 <- out_table_f6 %>% purrr::map_at(c(2,3,4), as.numeric) %>% dplyr::tbl_df()
+                      #  out_table_f6 <- out_table_f6 %>% purrr::map_at(c(2,3,4), as.numeric) %>%  as.data.frame(.,stringsAsFactors =TRUE)
+                      # 
+                      #  print("sum mother 5.2")
+                      # 
+                      #  print("summ mother table f6")
+                      # 
+                      #  openxlsx::addWorksheet(wb = wb,sheetName = "summary_organoleptic_mother",gridLines = TRUE)
+                      #  openxlsx::writeDataTable(wb,sheet = "summary_organoleptic_mother", x = out_table_f6, colNames = TRUE, keepNA = FALSE, withFilter = FALSE)
+                      # 
+                      # 
+                      #  openxlsx::saveWorkbook(wb = wb, file = hot_file, overwrite = TRUE)
+                     } else {
                        
-                       out_table_f6 <- out_table_f6 %>% map_at(c(2,3,4), as.numeric) %>% tbl_df()
-                       print("sum mother 5")
+                       out_table_f6 <- NULL
                        
-                       out_table_f6 <- as.data.frame(out_table_f6, stringsAsFactors =TRUE)    
-                       print("summ mother table f6")
-
-                       openxlsx::addWorksheet(wb = wb,sheetName = "summary_organoleptic_mother",gridLines = TRUE)
-                       openxlsx::writeDataTable(wb,sheet = "summary_organoleptic_mother", x = out_table_f6, colNames = TRUE, keepNA = FALSE, withFilter = FALSE)
-
+                     }
                        
-                       openxlsx::saveWorkbook(wb = wb, file = hot_file, overwrite = TRUE)
-                     
-                       print("sum baby")
+                     print("sum baby")
                      if(is.element("summary_organoleptic_baby", pvs_sheet)){
                        wb <- openxlsx::loadWorkbook(hot_file)
                        openxlsx::removeWorksheet(wb, sheet ="summary_organoleptic_baby")
                        openxlsx::saveWorkbook(wb = wb, file = hot_file, overwrite = TRUE)
                      } 
                 
-                       
-                       wb <- openxlsx::loadWorkbook(hot_file)
-                       form <- split_tidy_form(form = DF_f7)
-                       names_form <- names(form)
-                       out_table<- lapply(X = names_form, function(x) out_form_table(form[[x]])  )
-
-                       out_table <- rbindlist(out_table)
-                       out_table_f7 <- as.data.frame(out_table)
-
-                       out_table_f7 <- out_table_f7 %>% map_at(c(2,3,4), as.numeric) %>% tbl_df()
-                       out_table_f7 <- as.data.frame(out_table_f7, stringsAsFactors =TRUE)    
-                       
-                       print("pass outtable F7")
-                       
-                       openxlsx::addWorksheet(wb = wb,sheetName = "summary_organoleptic_baby",gridLines = TRUE)
-                       openxlsx::writeDataTable(wb,sheet = "summary_organoleptic_baby", x =  out_table_f7,colNames = TRUE, withFilter = FALSE, keepNA = FALSE)
-                   
-                       openxlsx::saveWorkbook(wb = wb, file = hot_file, overwrite = TRUE)
+                     if(is.element(pvs_sheet_list[7], pvs_sheet)){
+                      
+                       out_table_f7 <- form_checker(form = DF_f7, hot_file = hot_file)
+                           # wb <- openxlsx::loadWorkbook(hot_file)
+                           # form <- split_tidy_form(form = DF_f7)
+                           # names_form <- names(form)
+                           # out_table<- lapply(X = names_form, function(x) out_form_table(form[[x]])  )
+                           # 
+                           # out_table <- rbindlist(out_table)
+                           # out_table_f7 <- as.data.frame(out_table)
+                           # 
+                           # #out_table_f7 <- out_table_f7 %>% map_at(c(2,3,4), as.numeric) %>% tbl_df()
+                           # out_table_f7 <- out_table_f7 %>% map_at(c(2,3,4), as.numeric) %>%  as.data.frame(.,stringsAsFactors =TRUE)
+                           # #out_table_f7 <- as.data.frame(out_table_f7, stringsAsFactors =TRUE)    
+                           # 
+                           # print("pass outtable F7")
+                           # 
+                           # openxlsx::addWorksheet(wb = wb,sheetName = "summary_organoleptic_baby",gridLines = TRUE)
+                           # openxlsx::writeDataTable(wb,sheet = "summary_organoleptic_baby", x =  out_table_f7,colNames = TRUE, withFilter = FALSE, keepNA = FALSE)
+                           # 
+                           # openxlsx::saveWorkbook(wb = wb, file = hot_file, overwrite = TRUE)
                     
+                       } else {
+                         
+                         out_table_f7 <- NULL
+                     }
+
                        print("sum global")
                        if(is.element("summary_global", pvs_sheet)){
                        wb <- openxlsx::loadWorkbook(hot_file)
@@ -853,39 +889,61 @@ fbcheck_server <- function(input, output, session, values) {
                      
                       
                        wb <- openxlsx::loadWorkbook(hot_file)
-                       sum_f2 <- trait_summary_join(fieldbook = DF_f2, genotype = "INSTN",trait = trait_f2,
+                       
+                       if(!is.null(DF_f2)) {
+                       
+                         sum_f2 <- trait_summary_join(fieldbook = DF_f2, genotype = "INSTN",trait = trait_f2,
                                                     design = 'RCBD', trait_dict = trait_dict)
-                       trait_f2_old <- as.vector(t(outer(trait_f2, c("_n","_Mean","_sd"), paste, sep="")))
-                       trait_f2_new <- paste(trait_f2_old, "_FS", sep="")
-                       setnames(sum_f2, trait_f2_old, trait_f2_new)
-
+                         trait_f2_old <- as.vector(t(outer(trait_f2, c("_n","_Mean","_sd"), paste, sep="")))
+                         trait_f2_new <- paste(trait_f2_old, "_FS", sep="")
+                         setnames(sum_f2, trait_f2_old, trait_f2_new)
+                       } else {
+                         sum_f2 <- NULL
+                       }
+                       
                        print("sum f3")
                        #F3
-                       sum_f3 <- trait_summary_join(fieldbook = DF_f3, genotype = "INSTN", trait = trait_f3,
-                                                    design = 'RCBD', trait_dict = trait_dict)
-                       trait_f3_old <- as.vector(t(outer(trait_f3, c("_n","_Mean","_sd"), paste, sep="")))
-                       trait_f3_new <- paste(trait_f3_old, "_HS", sep="")
-                       setnames(sum_f3, trait_f3_old, trait_f3_new)
+                       if(!is.null(DF_f3)) {
+                         sum_f3 <- trait_summary_join(fieldbook = DF_f3, genotype = "INSTN", trait = trait_f3,
+                                                      design = 'RCBD', trait_dict = trait_dict)
+                         trait_f3_old <- as.vector(t(outer(trait_f3, c("_n","_Mean","_sd"), paste, sep="")))
+                         trait_f3_new <- paste(trait_f3_old, "_HS", sep="")
+                         setnames(sum_f3, trait_f3_old, trait_f3_new)
+                       } else {
+                         sum_f3 <- NULL
+                       }  
 
                        print("sum f4")
                        #F4
-                       sum_f4 <- trait_summary_join(fieldbook = DF_f4, genotype = "INSTN", trait = trait_f4,
-                                                    design = 'RCBD', trait_dict = trait_dict)
-                       trait_f4_old <- as.vector(t(outer(trait_f4, c("_n","_Mean","_sd"), paste, sep="")))
-                       trait_f4_new <- paste(trait_f4_old, "_mother", sep="")
-                       setnames(sum_f4, trait_f4_old, trait_f4_new)
-                      
-                        print("sum f5")
+                       if(!is.null(DF_f4)) {
+                         sum_f4 <- trait_summary_join(fieldbook = DF_f4, genotype = "INSTN", trait = trait_f4,
+                                                      design = 'RCBD', trait_dict = trait_dict)
+                         trait_f4_old <- as.vector(t(outer(trait_f4, c("_n","_Mean","_sd"), paste, sep="")))
+                         trait_f4_new <- paste(trait_f4_old, "_mother", sep="")
+                         setnames(sum_f4, trait_f4_old, trait_f4_new)
+                       } else {
+                          sum_f4 <- NULL
+                       }  
+                       
+                       
+                       print("sum f5")
                        #F5
+                       if(!is.null(DF_f5)) {
                        sum_f5 <- trait_summary_join(fieldbook = DF_f5, genotype = "INSTN", trait = trait_f5,
                                                     design = 'RCBD', trait_dict = trait_dict)
 
                        trait_f5_old <- as.vector(t(outer(trait_f5, c("_n","_Mean","_sd"), paste, sep="")))
                        trait_f5_new <- paste(trait_f5_old, "_baby", sep="")
                        setnames(sum_f5, trait_f5_old, trait_f5_new)
-
+                       
+                       } else {
+                         sum_f5 <- NULL
+                       }  
+                       
+                       
                        print("sum f6")
                        #F6
+                       if(!is.null(out_table_f6)) {
                        sum_f6 <- trait_summary_join(fieldbook = out_table_f6, genotype = "INSTN",design = 'RCBD',
                                                     trait = c("TEXTURE","TASTE","APPEARANCE"),
                                                     trait_dict = trait_dict)
@@ -894,127 +952,185 @@ fbcheck_server <- function(input, output, session, values) {
                        trait_f6_old <- as.vector(t(outer(trait_org_mother, c("_n","_Mean","_sd"), paste, sep="")))
                        trait_f6_new <- paste(trait_f6_old, "_mother", sep="")
                        setnames(sum_f6, trait_f6_old, trait_f6_new)
-
+                       
+                       } else {
+                         sum_f6 <- NULL
+                       }
+                       
                        print("sum f7")
                        #F7
+                       if(!is.null(out_table_f7)) {
                        sum_f7 <- trait_summary_join(fieldbook = out_table_f7, genotype = "INSTN",design = 'RCBD',
                                                     trait = c("TEXTURE","TASTE","APPEARANCE"),
                                                     trait_dict = trait_dict)
+                       
                        trait_org_baby = c("TEXTURE","TASTE","APPEARANCE")
                        trait_f7_old <- as.vector(t(outer(trait_org_baby, c("_n","_Mean","_sd"), paste, sep="")))
                        trait_f7_new <- paste(trait_f7_old, "_baby", sep="")
                        setnames(sum_f7, trait_f7_old, trait_f7_new)
-
+                       } else {
+                         sum_f7 <- NULL
+                       }
+                       print("sum f8")
+                       
+                       if(!is.null(DF_f8)) {
+                         sum_f8 <- trait_summary_join(fieldbook = DF_f8, genotype = "INSTN", trait = trait_f8,
+                                                      design = 'RCBD', trait_dict = trait_dict)
+                         
+                         trait_f8_old <- as.vector(t(outer(trait_f8, c("_n","_Mean","_sd"), paste, sep="")))
+                         trait_f8_new <- paste(trait_f8_old, "_mother", sep="")
+                         setnames(sum_f8, trait_f8_old, trait_f8_new)
+                         
+                       } else {
+                         sum_f8 <- NULL
+                       }  
+                       
+                       print("sum f9")
+                       
+                       if(!is.null(DF_f9)) {
+                         sum_f9 <- trait_summary_join(fieldbook = DF_f9, genotype = "INSTN", 
+                                                      trait = c("SCORE_MEN", "SCORE_WOMEN", "SCORE_GLOBAL", "PCT_MEN", "PCT_WOMEN", "PCT_GLOBAL"),
+                                                      design = 'RCBD', trait_dict = trait_dict)
+     
+                         print(sum_f9)
+                         trait_f9 <- c("SCORE_MEN", "SCORE_WOMEN", "SCORE_GLOBAL", "PCT_MEN", "PCT_WOMEN", "PCT_GLOBAL") 
+                         #trait_f9 <- setdiff(trait, names(DF_f9))
+                         trait_f9_old <- as.vector(t(outer(trait_f9, c("_n","_Mean","_sd"), paste, sep="")))
+                         trait_f9_new <- paste(trait_f9_old, "_mother", sep="")
+                         setnames(sum_f9, trait_f9_old, trait_f9_new)
+                         
+                       } else {
+                         sum_f9 <- NULL
+                       }  
+ 
                        print("enter reduce")
 
                        # trait_org_baby_new <- paste(trait_org_baby, "_baby", sep="")
                        # setnames(sum_f7,  trait_org_baby, trait_org_baby_new)
-
-                       res <- Reduce(function(...) merge(..., all=T), list(sum_f2, sum_f3 , sum_f4,
-                                                                           sum_f5, sum_f6 , sum_f7
-                       ))
+                       out_sum_list <- list(sum_f2, sum_f3 , sum_f4, sum_f5, sum_f6 , sum_f7, sum_f8, sum_f9 )
+                       
+                       #remove all NULL list (sum_fn) from out_sum_list
+                       out_sum_list <- out_sum_list[ ! sapply(out_sum_list, is.null) ]
+                       
+                       res <- Reduce(function(...) merge(..., all=T), out_sum_list )
 
                        openxlsx::addWorksheet(wb = wb, sheetName = "summary_global", gridLines = TRUE)
                        openxlsx::writeDataTable(wb, sheet = "summary_global", x = res,colNames = TRUE, withFilter = FALSE, keepNA = FALSE)
 
-
                        openxlsx::saveWorkbook(wb = wb, file = hot_file, overwrite = TRUE)
-                     
-
 
                      print("shell exec")
                      shell.exec(hot_file)
 
                    }
 
-                   else {
+                  else {
 
                      ##begin fbglobal
                      path <- fbglobal::get_base_dir()
                      path <- paste(path,"hot_fieldbook.rds", sep="\\")
                      DF <- readRDS(path)
                       #enf fbglobal
-
-
                      #DF <- readRDS("hot_fieldbook.rds")
 
-                   trait <- get_trait_fb(DF)
+                     trait <- get_trait_fb(DF)
+  
+                     hot_design <- as.character(hot_params()$hot_design)
+                     hot_design <- stringr::str_trim(hot_design,side = "both")
+                     
+                     if(is.na(hot_design)) { hot_design <- "RCBD"}
+                   
+                   #print(hot_design)  
+                    
+                       print("begin summary")
+                       
+                       if(is.element("FACTOR", names(DF))){
+                         try( summary <- trait_summary_join(fieldbook = DF, genotype = "INSTN", factor="FACTOR",trait = trait,
+                                                       design = hot_design, trait_dict = trait_dict)   )
+                       }
+                       print("4")
+                       if(!is.element("FACTOR", names(DF))){
+                         try( summary <- trait_summary_join(fieldbook = DF, genotype = "INSTN", trait = trait,
+                                                       design = hot_design, trait_dict = trait_dict) )
+                       }
+           
+                       print("end summary")
 
-                   hot_design <- as.character(hot_params()$hot_design)
-
-                   print("begin summary")
-
-                   if(is.element("FACTOR", names(DF))){
-                     try( summary <- trait_summary_join(fieldbook = DF, genotype = "INSTN",factor="FACTOR",trait = trait,
-                                                   design = hot_design, trait_dict = trait_dict)   )
-                   }
-                   print("4")
-                   if(!is.element("FACTOR", names(DF))){
-                     try( summary <- trait_summary_join(fieldbook = DF, genotype = "INSTN",trait = trait,
-                                                   design = hot_design, trait_dict = trait_dict) )
-                   }
-
-                   print("end summary")
-
-
-                   print("detection of sheets")
-
-                    hot_file <- hot_path()
-                    try(wb <- openxlsx::loadWorkbook(hot_file))
-                    try(sheets <- readxl::excel_sheets(path = hot_file))
-
-                    print("after loadworkbook")
-
-                   if(is.element("Fieldbook",sheets)){
-                     try( openxlsx::removeWorksheet(wb, "Fieldbook") )
-                   }
-
-                   if(is.element("Summary",sheets)){
-                     try(openxlsx::removeWorksheet(wb, "Summary"))
-                   }
-
-                   print("beggining of openxlsx functions")
-
-                   try(openxlsx::addWorksheet(wb = wb,sheetName = "Fieldbook",gridLines = TRUE))
-                   try(openxlsx::writeDataTable(wb,sheet = "Fieldbook", x = DF,colNames = TRUE, withFilter = FALSE))
-                   try(openxlsx::addWorksheet(wb = wb,sheetName = "Summary",gridLines = TRUE))
-                   try(openxlsx::writeDataTable(wb,sheet = "Summary", x = summary ,colNames = TRUE, withFilter = FALSE))
-                   try(openxlsx::saveWorkbook(wb = wb, file = hot_file, overwrite = TRUE) )
-
-                   print("traittols fuinctions")
-
-                   try(traits <- traittools::get_trait_fb(DF))
-
-                   print("col validation")
-                   try(traittools::col_validation_trait(file = hot_file,fbsheet = "Fieldbook",trait = traits,trait_dict = trait_dict))
-                   print("col outkiers")
-                   try(traittools::col_trait_outlier(file = hot_file, sumsheet = "Summary",trait = trait))
-
-                   #Drought Indexes
-                   trial <- hot_trial()
-
-                   if(trial == "Drought") {
-
-                     sheet <- "Drought_Indexes"
-                     sheets <- readxl::excel_sheets(path = hot_file)
-
-                     if(sheet %in% sheets){
-                       openxlsx::removeWorksheet(wb = wb, sheet = "Drought_Indexes")
-                     }
-
-                     openxlsx::addWorksheet(wb = wb, sheetName = sheet, gridLines = TRUE)
-                     fb <- readxl::read_excel(hot_file, sheet ="Fieldbook")
-
-                     lvl1 <- as.character(hot_params()$hot_factor_lvl1)
-                     lvl2 <- as.character(hot_params()$hot_factor_lvl2)
-
-                     di <- drought_index(fb, lvl1, lvl2)
-                   #
-                     try(openxlsx::writeDataTable(wb, sheet = sheet, x = di ,colNames = TRUE, withFilter = FALSE))
-                     try(openxlsx::saveWorkbook(wb = wb, file = hot_file, overwrite = TRUE) )
-                   }
-
-                   try(openxlsx::saveWorkbook(wb = wb, file = hot_file, overwrite = TRUE) )
+                       print("detection of sheets")
+    
+                        hot_file <- hot_path()
+                        try(wb <- openxlsx::loadWorkbook(hot_file))
+                        try(sheets <- readxl::excel_sheets(path = hot_file))
+    
+                        print("after loadworkbook")
+    
+                       if(is.element("Fieldbook",sheets)){
+                         try( openxlsx::removeWorksheet(wb, "Fieldbook") )
+                       }
+    
+                       if(is.element("Summary",sheets)){
+                         try(openxlsx::removeWorksheet(wb, "Summary"))
+                       }
+    
+                       print("beggining of openxlsx functions")
+    
+                       try(openxlsx::addWorksheet(wb = wb,sheetName = "Fieldbook",gridLines = TRUE))
+                       try(openxlsx::writeDataTable(wb,sheet = "Fieldbook", x = DF,colNames = TRUE, withFilter = FALSE))
+                       
+                       print(hot_design)
+                       
+                       if(hot_design!="UNDR") { #Avoid unreplicated block design
+                       #to do: traslate this condition to traittools package, specifically in  summary_by_desing  
+                       try(openxlsx::addWorksheet(wb = wb,sheetName = "Summary",gridLines = TRUE))
+                       try(openxlsx::writeDataTable(wb,sheet = "Summary", x = summary ,colNames = TRUE, withFilter = FALSE))
+                       try(openxlsx::saveWorkbook(wb = wb, file = hot_file, overwrite = TRUE) )
+                         
+                       }
+                       
+                       print("traittols functions")
+    
+                       try(traits <- traittools::get_trait_fb(DF))
+    
+                       print("col validation")
+                       try(traittools::col_validation_trait(file = hot_file,fbsheet = "Fieldbook",trait = traits,trait_dict = trait_dict))
+                       print("col outkiers")
+                       
+                       if(hot_design!="UNDR"){
+                       try(traittools::col_trait_outlier(file = hot_file, sumsheet = "Summary",trait = trait))
+                       }
+                       
+                       #Drought Indexes
+                       trial <- hot_trial()
+                       trial <- stringr::str_trim(trial, side = "both")  
+                       
+                       if(trial == "Drought") {
+    
+                         lvl1 <- as.character(hot_params()$hot_factor_lvl1)
+                         lvl2 <- as.character(hot_params()$hot_factor_lvl2)
+                         
+                         fb <- readxl::read_excel(hot_file, sheet ="Fieldbook")
+                         di <- drought_index(fb, lvl1, lvl2)
+                         
+                         if(!is.null(di)){
+                         
+                           sheet <- "Drought_Indexes"
+                           sheets <- readxl::excel_sheets(path = hot_file)
+                           
+                           if(sheet %in% sheets){
+                             openxlsx::removeWorksheet(wb = wb, sheet = "Drought_Indexes")
+                           }
+                           
+                           openxlsx::addWorksheet(wb = wb, sheetName = sheet, gridLines = TRUE)
+                         
+                           
+                           try(openxlsx::writeDataTable(wb, sheet = sheet, x = di ,colNames = TRUE, withFilter = FALSE))
+                           try(openxlsx::saveWorkbook(wb = wb, file = hot_file, overwrite = TRUE) )
+                         
+                         }
+                         
+                       }
+    
+                       try(openxlsx::saveWorkbook(wb = wb, file = hot_file, overwrite = TRUE) )
 
                    print("ejecucion")
                    try(shell.exec(hot_file))
