@@ -155,3 +155,23 @@ get.fb.param <-function(fp,sheet,param){
   params[params$Factor==param,2]
 }
 
+
+#' Function to obtain parameter from Participatory Varietal Selection's fieldbooks (PVS).
+#' @description This function gets parameters or values from PVS fieldbook excel file. Do an excel scrapping.
+#' @param pvs_data fieldbook path
+#' @param col_param column parameter. By default is "Mother".
+#' @param row_param row parameter. By default is ""Plot_size_(m2)"
+#' @export 
+#' 
+#' 
+
+get_pvs_param <- function(pvs_data, col_param = "Mother", row_param = "Plot_size_(m2)"){
+  
+  #param <- readxl::read_excel(path=hot_file , sheet = "Installation")
+  params <- as.data.frame(pvs_data)
+  out  <-  as.numeric(params[params$Factor==row_param, col_param]) #dejar un peque?o espacio despues de (m2) 
+  #plant.denmb = as.numeric(instmb[instmb$Factor=="Planting density (plants/Ha)","Mother"])
+  
+}
+
+

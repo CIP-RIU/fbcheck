@@ -91,10 +91,22 @@ fbcheck_server <- function(input, output, session, values) {
       hot_factor_lvl1 <- get_fb_param( hot_param, "Factor_name_1")
 
       hot_factor_lvl2 <- get_fb_param( hot_param, "Factor_name_2")
+      
+      
+      hot_psize_mother <- get_pvs_param(pvs_data = hot_param, col_param = "Mother", row_param = "Plot_size_(m2)")
+      hot_psize_baby <- get_pvs_param(pvs_data = hot_param, col_param = "Baby_1", row_param = "Plot_size_(m2)")
+      
+      hot_pden_mother <- get_pvs_param(pvs_data = hot_param, col_param = "Mother", row_param = "Planting_density_(plants/Ha)")
+      hot_pden_baby <- get_pvs_param(pvs_data = hot_param, col_param = "Baby_1", row_param = "Planting_density_(plants/Ha)")
+      
+      
 
       hot_params_list <- list(hot_design = hot_design, hot_plot_size = hot_plot_size,
                               hot_plant_den =  hot_plant_den,  hot_factor_lvl1 = hot_factor_lvl1,
-                              hot_factor_lvl2 =  hot_factor_lvl2)
+                              hot_factor_lvl2 =  hot_factor_lvl2, 
+                              hot_psize_mother = hot_psize_mother, hot_pden_mother = hot_pden_mother,
+                              hot_psize_baby   = hot_psize_baby,   hot_pden_baby   = hot_pden_baby
+                              )
     }
   })
 
@@ -429,9 +441,13 @@ fbcheck_server <- function(input, output, session, values) {
 
     if(input$calculate>0){
 
-      hot_plot_size <- as.numeric(hot_params()$hot_plot_size)
-      hot_plant_den <- as.numeric(hot_params()$hot_plant_den)
+      #hot_plot_size <- as.numeric(hot_params()$hot_plot_size)
+      #hot_plot_size <- as.numeric(hot_params()$hot_plant_den)
 
+      hot_plot_size    <-   as.numeric(hot_params()$hot_psize_baby)
+      hot_plant_den     <-   as.numeric(hot_params()$hot_pden_baby)
+      
+      
       DF = values[["hot_f5_btable"]]
       DF <- as.data.frame(DF)
 
@@ -799,14 +815,15 @@ fbcheck_server <- function(input, output, session, values) {
                      print("sum mother")
                      
                      if(is.element("summary_organoleptic_mother", pvs_sheet)){
+                        print("remove sheet mother summ orgh")
                          wb <- openxlsx::loadWorkbook(hot_file)
                          openxlsx::removeWorksheet(wb, sheet ="summary_organoleptic_mother")
                          openxlsx::saveWorkbook(wb = wb, file = hot_file, overwrite = TRUE)
-                       }
+                     }
                      
                      if(is.element(pvs_sheet_list[6], pvs_sheet)){
                        
-                       out_table_f6 <- form_checker(form = DF_f6, hot_file = hot_file)
+                       out_table_f6 <- form_checker(form = DF_f6, hot_file = hot_file, sheet_name = "summary_organoleptic_mother")
                        
                       #  wb <- openxlsx::loadWorkbook(hot_file)
                       # # print("sum mother -1")
@@ -854,8 +871,8 @@ fbcheck_server <- function(input, output, session, values) {
                      } 
                 
                      if(is.element(pvs_sheet_list[7], pvs_sheet)){
-                      
-                       out_table_f7 <- form_checker(form = DF_f7, hot_file = hot_file)
+                       
+                       out_table_f7 <- form_checker(form = DF_f7, hot_file = hot_file, sheet_name = "summary_organoleptic_baby")
                            # wb <- openxlsx::loadWorkbook(hot_file)
                            # form <- split_tidy_form(form = DF_f7)
                            # names_form <- names(form)
@@ -1040,7 +1057,7 @@ fbcheck_server <- function(input, output, session, values) {
                      
                      if(is.na(hot_design)) { hot_design <- "RCBD"}
                    
-                   #print(hot_design)  
+                      #print(hot_design)  
                     
                        print("begin summary")
                        

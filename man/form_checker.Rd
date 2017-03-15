@@ -4,12 +4,14 @@
 \alias{form_checker}
 \title{Organoleptic form checker}
 \usage{
-form_checker(form, hot_file)
+form_checker(form, hot_file, sheet_name = NULL)
 }
 \arguments{
 \item{form}{organoleptic form}
 
 \item{hot_file}{file path}
+
+\item{sheet_name}{sheet name}
 }
 \description{
 organoleptic forms sometimes has unconsistencies or typos that we must be care before processing.
