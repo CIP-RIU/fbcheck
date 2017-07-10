@@ -185,7 +185,7 @@ fbcheck_server <- function(input, output, session, values) {
 
       DF = values[["hot_btable"]]
       DF <- as.data.frame(DF)
-      DF <- calculate_trait_variables(fb = DF,plot_size = hot_plot_size,
+      DF <- traittools::calculate_trait_variables(fb = DF,plot_size = hot_plot_size,
                                       plant_den = hot_plant_den,mgt = hot_mgt(),mtl=hot_mtl(),trial_type=hot_trial())
       #print(DF)
     }
@@ -229,14 +229,7 @@ fbcheck_server <- function(input, output, session, values) {
     
   })  
   
-  #The Selection Criteria Fieldbook 1
-  # pvs_sheet_list <- c("F1_selection_criteria", "F2_select_clones_flowering", "F3_select_clones_harvest",
-  #                     "F4_harvest_mother" ,
-  #                     "F5_harvest_baby", "F6_organoleptic_mother",
-  #                     "F7_organoleptic_baby", "F8_postharvest_dormancy",
-  #                     "F9_postharvest_clones_storage")
-   
-  
+  #Selection Criteria
   output$hot_f1_btable  <-  renderRHandsontable({
 
     values  <-  shiny::reactiveValues(

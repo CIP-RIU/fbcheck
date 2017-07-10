@@ -17,4 +17,3 @@ Function for trait type
 \author{
 omar benites
 }
-

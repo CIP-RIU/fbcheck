@@ -19,4 +19,3 @@ organoleptic forms sometimes has unconsistencies or typos that we must be care b
 \author{
 Omar Benites
 }
-

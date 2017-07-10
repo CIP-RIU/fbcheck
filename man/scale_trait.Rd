@@ -17,4 +17,3 @@ Function to get the scale of differents trait,
 \author{
 omar benites
 }
-
