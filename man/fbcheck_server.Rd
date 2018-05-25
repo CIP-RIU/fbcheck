@@ -21,4 +21,3 @@ Returns server side components
 \author{
 Omar Benites
 }
-

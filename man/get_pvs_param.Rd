@@ -16,4 +16,3 @@ get_pvs_param(pvs_data, col_param = "Mother", row_param = "Plot_size_(m2)")
 \description{
 This function gets parameters or values from PVS fieldbook excel file. Do an excel scrapping.
 }
-

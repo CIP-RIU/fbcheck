@@ -15,4 +15,3 @@ return an organized table
 \author{
 Omar Benites
 }
-

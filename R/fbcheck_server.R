@@ -12,18 +12,28 @@ fbcheck_server <- function(input, output, session, values) {
 
   #Catch the file path for reading fieldbook sheets
   volumes <- shinyFiles::getVolumes()
+
   shinyFileChoose(input, 'file', roots=volumes, session=session,
                   restrictions=system.file(package='base'),filetypes=c('xlsx'))
-
+  
+  #Type of format file
+  hot_formatFile <- reactive({ 
+  
+      dsource <- input$fbdesign_dsource
+      if(dsource=="HIDAP") tff <- "HIDAP" 
+      if(dsource=="FieldBookApp-SPBase") tff <- "FieldBookApp-SPBase" 
+      tff
+  })
+  
   #Return the file path (Excel file path)
   hot_path <- reactive ({
     req(input$file)
     if(is.null(input$file)){return(NULL)}
-
+    
     validate(
       need(input$file != "", label = "Please enter an XLSX file. XLS files are forbidden")
     )
-
+    
     if(length(input$file)==0){return (NULL)}
     if(length(input$file)>0){
       hot_file <- as.character(parseFilePaths(volumes, input$file)$datapath)
@@ -32,14 +42,17 @@ fbcheck_server <- function(input, output, session, values) {
 
   #Read the fieldbook data
   hot_bdata <- reactive({
+    
+    file_type <- hot_formatFile()
+    
+    #2. fieldbook from HIDAP
+    if(file_type == "HIDAP"){
     hot_file <- hot_path()
     print(hot_file)
     if(length(hot_file)==0){return (NULL)}
     if(length(hot_file)>0){
 
-      #hot_bdata <- readxl::read_excel(path=hot_file , sheet = "Fieldbook")
-
-      print(hot_trial())
+#      print(hot_trial())
 
       if(hot_trial()=="Participatory Varietal Selection"){
 
@@ -54,21 +67,40 @@ fbcheck_server <- function(input, output, session, values) {
         names(hot_bdata) <- fb_sheets
         hot_bdata
 
-      } else {
+      }  else {
 
         hot_bdata <- readxl::read_excel(path=hot_file , sheet = "Fieldbook")
         if(is.element("DATESP", names(hot_bdata))){ hot_bdata$DATESP <- as.character(hot_bdata$DATESP) }
         if(is.element("EDATE", names(hot_bdata))){ hot_bdata$EDATE <- as.character(hot_bdata$EDATE)}
         hot_bdata
       }
+      
       #saveRDS(object = hot_bdata, "temp.rda")
       hot_bdata
 
 
     }
+    
+    }
+    
+    #1. Fieldbook from fieldbookapp
+    if(file_type == "FieldBookApp-SPBase"){
+      file_fbapp <- input$file_fbapp
+      if (is.null(file_fbapp))  return(NULL)
+      dt <- readr::read_csv(file_fbapp$datapath)
+      #dt <- readr::read_csv(file ="D:\\HIDAP_DOCUMENTATION_AND_EXAMPLES\\HIDAP-SweetPotatoBase\\FieldBookApp\\formato para subir a la base de datos\\fbapp_trial1_sbase_bryanEllerbrock.csv")
+      
+      # Data wrangling ----------------------------------------------------------
+      hot_bdata <- fbapp2hidap(dt) 
+      
+    }
+    
+    hot_bdata
+    
+    
   })
 
-   #Return Installation sheet parameters
+  #Return Installation sheet parameters
   hot_params <- reactive({
     hot_file <- hot_path()
     if(length(hot_file)==0){return (NULL)}
@@ -112,24 +144,42 @@ fbcheck_server <- function(input, output, session, values) {
 
   #Return the type of crop in Minimal sheet
   hot_crop <- reactive({
-    hot_file <- hot_path()
-    if(length(hot_file)==0){return (NULL)}
-    if(length(hot_file)>0){
-      hot_param <- readxl::read_excel(path=hot_file , sheet = "Minimal")
-      hot_crop <- get_fb_param(hot_param,"Crop")
+    
+    formatFile <- hot_formatFile()
+   
+    if(formatFile =="HIDAP"){
+      
+        hot_file <- hot_path()
+        if(length(hot_file)==0){return (NULL)}
+        if(length(hot_file)>0){
+          hot_param <- readxl::read_excel(path=hot_file , sheet = "Minimal")
+          hot_crop <- get_fb_param(hot_param,"Crop")
+        }
     }
+    
+    if(formatFile =="FieldBookApp-SPBase"){hot_crop <- "sweetpotato"}
+    
+    hot_crop
+    
   })
 
   #Return the type of trial in Minimal sheet
   hot_trial <- reactive({
-    hot_file <- hot_path()
-    if(length(hot_file)==0){return (NULL)}
-    if(length(hot_file)>0){
-      hot_param <- readxl::read_excel(path=hot_file , sheet = "Minimal")
-      #hot_crop <- get_fb_param(hot_param,"Type of Trial") #in DataCollector
-      hot_trial <- get_fb_param(hot_param,"Type_of_Trial") #in HiDAP
-
+    
+    formatFile <- hot_formatFile()
+    
+    if(formatFile =="HIDAP"){
+        hot_file <- hot_path()
+        if(length(hot_file)==0){return (NULL)}
+        if(length(hot_file)>0){
+          hot_param <- readxl::read_excel(path=hot_file , sheet = "Minimal")
+          #hot_crop <- get_fb_param(hot_param,"Type of Trial") #in DataCollector
+          hot_trial <- get_fb_param(hot_param,"Type_of_Trial") #in HiDAP
+        }
     }
+    #In case of FieldBookApp there is no sheet
+    if(formatFile =="FieldBookApp-SPBase"){hot_trial <- "yield"}
+    hot_trial
   })
 
   #Return the Crop Management sheet
@@ -157,70 +207,147 @@ fbcheck_server <- function(input, output, session, values) {
     }
   })
 
+  #warning messages
+  shiny::observeEvent(input$calculate, {
+    
+    fb <- hot_bdata()
+    fb_names <- names(fb)
+    trial <- hot_trial()
+    print(trial)
+    
+    if(trial == "Late blight" && !is.element("REP", fb_names)){
+        shinysky::showshinyalert(session, "alert_fb_warning", paste("Warning: Scale AUDPC can not be calculated because your design does not have repetition column (Ex. Westcott design)"), styleclass = "warning")
+    }
+    
+  })
+  
   #hot_btable represents fieldbook data
   output$hot_btable  <-  renderRHandsontable({
-
+    
     req(input$file)
-
+    print(hot_trial())
+    print(hot_bdata())
+    
     if(hot_trial()!="Participatory Varietal Selection"){
-
-    values  <-  shiny::reactiveValues(
-      hot_btable = hot_bdata()
-    )
-
-    DF <- NULL
-
-    if (!is.null(input$hot_btable)) {
-      DF = hot_to_r(input$hot_btable)
-      values[["hot_btable"]] = DF
-    } else if (!is.null(values[["hot_btable"]])) {
-      DF = values[["hot_btable"]]
-    }
-
-    if(input$calculate>0){
-
-      hot_plot_size <- as.numeric(hot_params()$hot_plot_size)
-
-      hot_plant_den <- as.numeric(hot_params()$hot_plant_den)
-
-      DF = values[["hot_btable"]]
-      DF <- as.data.frame(DF)
-      DF <- calculate_trait_variables(fb = DF,plot_size = hot_plot_size,
-                                      plant_den = hot_plant_den,mgt = hot_mgt(),mtl=hot_mtl(),trial_type=hot_trial())
-      #print(DF)
-    }
-
-    if(!is.null(DF)){
-
-      traits <- get_trait_fb(DF)
-
-      ##begin fbglobal
-      path <- fbglobal::get_base_dir()
-      path <- paste(path,"hot_fieldbook.rds", sep="\\")
-      saveRDS(DF, path)
-
-      #enf fbglobal
-
-      #saveRDS(DF,"hot_fieldbook.rds")
-
-      crop <- hot_crop()
-      trial <- hot_trial()
-      print(DF)
-      #trait_dict <- get_crop_ontology(crop = crop,trial = trial)
-      trait_dict <- get_crop_ontology(crop = crop)
-      traittools::col_render_trait(fieldbook = DF, trait = traits , trait_dict = trait_dict)
-
-    }
-    #}
+      
+      values  <-  shiny::reactiveValues(
+        hot_btable = hot_bdata()
+      )
+      
+      DF <- NULL
+      
+      if (!is.null(input$hot_btable)) {
+        DF = hot_to_r(input$hot_btable)
+        values[["hot_btable"]] = DF
+      } else if (!is.null(values[["hot_btable"]])) {
+        DF = values[["hot_btable"]]
+      }
+      
+      if(input$calculate>0){
+        
+        hot_plot_size <- as.numeric(hot_params()$hot_plot_size)
+        
+        hot_plant_den <- as.numeric(hot_params()$hot_plant_den)
+        
+        DF = values[["hot_btable"]]
+        DF <- as.data.frame(DF)
+        DF <- traittools::calculate_trait_variables(fb = DF,plot_size = hot_plot_size,
+                                                    plant_den = hot_plant_den,mgt = hot_mgt(),mtl=hot_mtl(),trial_type=hot_trial())
+        #print(DF)
+      }
+      
+      if(!is.null(DF)){
+        
+        traits <- get_trait_fb(DF, dsource = 1 )
+        
+        ##begin fbglobal
+        path <- fbglobal::get_base_dir()
+        path <- paste(path,"hot_fieldbook.rds", sep="\\")
+        saveRDS(DF, path)
+        
+        #enf fbglobal
+        
+        #saveRDS(DF,"hot_fieldbook.rds")
+        
+        crop <- hot_crop()
+        trial <- hot_trial()
+        print(DF)
+        #trait_dict <- get_crop_ontology(crop = crop,trial = trial)
+        trait_dict <- get_crop_ontology(crop = crop)
+        traittools::col_render_trait(fieldbook = DF, trait = traits , trait_dict = trait_dict, dsource = 1)
+        
+      }
+      #}
     }#fin del if de pvs
   })
+  
 
+  #hot_btable represents fieldbook data
+  output$hot_btable_fbapp <-  renderRHandsontable({
+    
+    req(input$file_fbapp)
+    
+    values<-  shiny::reactiveValues(
+        hot_btable = hot_bdata()
+    )
+      
+      DF <- NULL
+      
+      if (!is.null(input$hot_btable)) {
+        DF = hot_to_r(input$hot_btable)
+        values[["hot_btable"]] = DF
+      } else if (!is.null(values[["hot_btable"]])) {
+        DF = values[["hot_btable"]]
+      }
+      
+      print("print DF")
+      print(DF)
+    
+      if(!is.null(DF)){
+        
+        dsource <- hot_formatFile()
+        if(dsource=="FieldBookApp-SPBase") dsource <- 2
+        
+        traits <- traittools::get_trait_fb(DF, dsource = dsource)
+        print(traits)
+        
+        ##begin fbglobal
+        path <- fbglobal::get_base_dir()
+        path <- paste(path,"hot_fieldbook.rds", sep="\\")
+        saveRDS(DF, path)
+        #enf fbglobal
+  
+        print("checking with crop ontology")
+        crop <- hot_crop()
+        #trait_dict <- get_crop_ontology(crop = crop,trial = trial)
+        trait_dict <- get_crop_ontology(crop = crop, dsource = dsource)
+        traittools::col_render_trait(fieldbook = DF, trait = traits , trait_dict = trait_dict, dsource = dsource)
+      }
+  })
+  
+  
   #Shiny tree with selection criteria used in PVS
   output$fbcheckSelect_criteria <- shinyTree::renderTree({
 
     out <- selcriteria
     out
   })
+
+  output$fbcheck_genofilter <- renderUI({
+    #req(input$file)
+    ifelse("INSTN" %in% names(hot_bdata()) , sel <- "INSTN", sel <- 1)
+  
+    selectInput(inputId = "sel_fbcheck_genofilter",label = "Select Genotypes",choices = names(hot_bdata()),multiple = TRUE,selected = sel)
+      
+  })
+  
+  
+  output$fbcheck_factorfilter <- renderUI({
+     #req(input$file)
+     selectInput(inputId = "sel_fbcheck_factorfilter",label = "Summary by",choices = names(hot_bdata()),multiple = TRUE,selected = 1)
+  
+  })
+  
 
   pvs_fb_sheets <- reactive({
     hot_file <- hot_path()
@@ -229,14 +356,7 @@ fbcheck_server <- function(input, output, session, values) {
     
   })  
   
-  #The Selection Criteria Fieldbook 1
-  # pvs_sheet_list <- c("F1_selection_criteria", "F2_select_clones_flowering", "F3_select_clones_harvest",
-  #                     "F4_harvest_mother" ,
-  #                     "F5_harvest_baby", "F6_organoleptic_mother",
-  #                     "F7_organoleptic_baby", "F8_postharvest_dormancy",
-  #                     "F9_postharvest_clones_storage")
-   
-  
+  #Selection Criteria
   output$hot_f1_btable  <-  renderRHandsontable({
 
     values  <-  shiny::reactiveValues(
@@ -644,18 +764,25 @@ fbcheck_server <- function(input, output, session, values) {
     try({
 
     #For single Fieldbooks
-    withProgress(message = "Downloading Fieldbook and Applying Format...",value= 0,
-                 {
-
+    withProgress(message = "Downloading Fieldbook and Applying Format...",value= 0, {
+                  
+                   shiny::incProgress(amount = 1/30, message = "selecting trait dictionary")
+                   
+                   
                    crop <- hot_crop()
                    trial <- hot_trial()
 
                    if(crop == "potato"){
+                     #dataset table module potato imported from fbdesign
                      trait_dict2 <- table_module_potato
+                     shiny::incProgress(2/30,message = "potato dictionary")
+                     
                    }
 
                    if(crop == "sweetpotato"){
+                     #dataset table module potato imported from fbdesign
                      trait_dict2 <- table_module_sweetpotato
+                     shiny::incProgress(2/30,message = "sweet potato dictionary")
                    }
 
                    trait_dict <- trait_dict2
@@ -1041,8 +1168,13 @@ fbcheck_server <- function(input, output, session, values) {
 
                    }
 
+                  
+                   
                   else {
-
+                    
+                    shiny::incProgress(3/30,message = "reading installation data") 
+                    
+                    
                      ##begin fbglobal
                      path <- fbglobal::get_base_dir()
                      path <- paste(path,"hot_fieldbook.rds", sep="\\")
@@ -1055,102 +1187,165 @@ fbcheck_server <- function(input, output, session, values) {
                      hot_design <- as.character(hot_params()$hot_design)
                      hot_design <- stringr::str_trim(hot_design,side = "both")
                      
-                     if(is.na(hot_design)) { hot_design <- "RCBD"}
-                   
-                      #print(hot_design)  
+                     #fbcheck_filter <- input$sel_fbcheck_filter
+                     genofilter <- input$sel_fbcheck_genofilter
+                     print(genofilter)
+                     factorfilter  <- input$sel_fbcheck_factorfilter
+                     print(factorfilter)
+                     
+                     if(is.na(hot_design)) { hot_design <- "RCBD"} #by default we chooose randomized complete block design
                     
-                       print("begin summary")
+                     shiny::incProgress(4/30, message = "summarizing data") 
+                     
+                      print("doing summary")
+                 
+                      try( summary <- trait_summary_join(fieldbook = DF, genotype = genofilter,  trait = trait,
+                                                            design = hot_design, trait_dict = trait_dict) )
+                         
+                       #print(summary)
+                       #factores <- as.character(c())
                        
-                       if(is.element("FACTOR", names(DF))){
-                         try( summary <- trait_summary_join(fieldbook = DF, genotype = "INSTN", factor="FACTOR",trait = trait,
-                                                       design = hot_design, trait_dict = trait_dict)   )
+                       #if(is.element("FACTOR", names(DF))){
+                     
+                       shiny::incProgress(12/30, message = "checking for another factors") 
+                       print("checking factor filters to sum up")
+                       
+                       if( length(factorfilter)>0 || !is.null(factorfilter)){  
+                         
+                         print(factorfilter)
+                         
+                         try( summaryFactors <- trait_summary_join(fieldbook = DF, genotype = genofilter, factor = factorfilter, trait = trait, 
+                                                                   design = hot_design, trait_dict = trait_dict) )
+                         #print(summaryFactors)
+                         
                        }
-                       print("4")
-                       if(!is.element("FACTOR", names(DF))){
-                         try( summary <- trait_summary_join(fieldbook = DF, genotype = "INSTN", trait = trait,
-                                                       design = hot_design, trait_dict = trait_dict) )
+                       
+                        
+                       print("end checking factors")
+               
+                       if(all(is.element(c("FEMALE", "MALE"), names(DF)))){
+                         try( summary <- trait_summary_join(fieldbook = DF, genotype = "INSTN", factor = c("FEMALE","MALE"), trait = trait,
+                                                            design = hot_design, trait_dict = trait_dict) )
                        }
-           
+                       
+                       
+                       if(all(is.element(c("LINE", "TESTER"), names(DF)))) {
+                         try( summary <- trait_summary_join(fieldbook = DF, genotype = "LINE", factor = c("TESTER"), trait = trait,
+                                                            design = hot_design, trait_dict = trait_dict) )
+                       }
+                       
                        print("end summary")
-
                        print("detection of sheets")
-    
+                       shiny::incProgress(13/30,message = "detection of sheets in field book file") 
+                       
                         hot_file <- hot_path()
                         try(wb <- openxlsx::loadWorkbook(hot_file))
                         try(sheets <- readxl::excel_sheets(path = hot_file))
     
-                        print("after loadworkbook")
+                       print("after loadworkbook")
     
+                       shiny::incProgress(14/30,message = "checking for another factors") 
+                        
+                        
                        if(is.element("Fieldbook",sheets)){
                          try( openxlsx::removeWorksheet(wb, "Fieldbook") )
                        }
-    
+                       shiny::incProgress(15/30,message = "checking fieldbook sheet") 
+                        
                        if(is.element("Summary",sheets)){
                          try(openxlsx::removeWorksheet(wb, "Summary"))
                        }
+                       shiny::incProgress(16/30,message = "checking summary sheet")  
+                       
+                       if(is.element("Summary_factor",sheets)){
+                          try(openxlsx::removeWorksheet(wb, "Summary_factor"))
+                       }  
+                       shiny::incProgress(17/30,message = "checking summary by facto sheet")  
+                       
+                        #print(summary)
+                        #print(summaryFactors)
     
+                       shiny::incProgress(18/30,message = "adding sheets")   
                        print("beggining of openxlsx functions")
-    
+                         
+                       shiny::incProgress(19/30,message = "writting fieldbook data")     
                        try(openxlsx::addWorksheet(wb = wb,sheetName = "Fieldbook",gridLines = TRUE))
                        try(openxlsx::writeDataTable(wb,sheet = "Fieldbook", x = DF,colNames = TRUE, withFilter = FALSE))
                        
-                       print(hot_design)
+                       
+                       #print(hot_design)
+                       
                        
                        if(hot_design!="UNDR") { #Avoid unreplicated block design
+                         
+                       shiny::incProgress(11/15,message = "writting summary by genotype data")        
                        #to do: traslate this condition to traittools package, specifically in  summary_by_desing  
                        try(openxlsx::addWorksheet(wb = wb,sheetName = "Summary",gridLines = TRUE))
                        try(openxlsx::writeDataTable(wb,sheet = "Summary", x = summary ,colNames = TRUE, withFilter = FALSE))
-                       try(openxlsx::saveWorkbook(wb = wb, file = hot_file, overwrite = TRUE) )
+                       
+                       # print("PRINTIN FACTORFILTER")
+                       # print(factorfilter) 
+                       # print("CLODE SUMMARY FILTER")
+                       if(length(factorfilter)>0){   
+                       shiny::incProgress(11/15,message = "writting summary by factor data")       
+                       try(openxlsx::addWorksheet(wb = wb,sheetName = "Summary_factor",gridLines = TRUE))
+                       try(openxlsx::writeDataTable(wb,sheet = "Summary_factor", x = summaryFactors ,colNames = TRUE, withFilter = FALSE))   
+                          
+                       }    
                          
+                       try(openxlsx::saveWorkbook(wb = wb, file = hot_file, overwrite = TRUE) )
+                       
                        }
                        
                        print("traittols functions")
     
                        try(traits <- traittools::get_trait_fb(DF))
     
+                       shiny::incProgress(22/30,message = "checking outliers")     
                        print("col validation")
                        try(traittools::col_validation_trait(file = hot_file,fbsheet = "Fieldbook",trait = traits,trait_dict = trait_dict))
                        print("col outkiers")
                        
-                       if(hot_design!="UNDR"){
-                       try(traittools::col_trait_outlier(file = hot_file, sumsheet = "Summary",trait = trait))
-                       }
+                       ##### Detection of outlier disabled for hidap version 1.0.2 
+                       #if(hot_design!="UNDR"){ 
+                       #try(traittools::col_trait_outlier(file = hot_file, sumsheet = "Summary",trait = trait))
+                       #}
+                       ##### 
                        
                        #Drought Indexes
                        trial <- hot_trial()
                        trial <- stringr::str_trim(trial, side = "both")  
                        
-                       if(trial == "Drought") {
-    
-                         lvl1 <- as.character(hot_params()$hot_factor_lvl1)
-                         lvl2 <- as.character(hot_params()$hot_factor_lvl2)
-                         
-                         fb <- readxl::read_excel(hot_file, sheet ="Fieldbook")
-                         di <- drought_index(fb, lvl1, lvl2)
-                         
-                         if(!is.null(di)){
-                         
-                           sheet <- "Drought_Indexes"
-                           sheets <- readxl::excel_sheets(path = hot_file)
-                           
-                           if(sheet %in% sheets){
-                             openxlsx::removeWorksheet(wb = wb, sheet = "Drought_Indexes")
-                           }
-                           
-                           openxlsx::addWorksheet(wb = wb, sheetName = sheet, gridLines = TRUE)
-                         
-                           
-                           try(openxlsx::writeDataTable(wb, sheet = sheet, x = di ,colNames = TRUE, withFilter = FALSE))
-                           try(openxlsx::saveWorkbook(wb = wb, file = hot_file, overwrite = TRUE) )
-                         
-                         }
-                         
-                       }
-    
+                       # if(trial == "Abiotic stress") {
+                       # 
+                       #   lvl1 <- as.character(hot_params()$hot_factor_lvl1)
+                       #   lvl2 <- as.character(hot_params()$hot_factor_lvl2)
+                       #   
+                       #   fb <- readxl::read_excel(hot_file, sheet ="Fieldbook")
+                       #   di <- drought_index(fb, lvl1, lvl2)
+                       #   
+                       #   if(!is.null(di)){
+                       #   
+                       #     sheet <- "Drought_Indexes"
+                       #     sheets <- readxl::excel_sheets(path = hot_file)
+                       #     
+                       #     if(sheet %in% sheets){
+                       #       openxlsx::removeWorksheet(wb = wb, sheet = "AbioticS_Indexes")
+                       #     }
+                       #     
+                       #     openxlsx::addWorksheet(wb = wb, sheetName = sheet, gridLines = TRUE)
+                       #   
+                       #     try(openxlsx::writeDataTable(wb, sheet = sheet, x = di ,colNames = TRUE, withFilter = FALSE))
+                       #     try(openxlsx::saveWorkbook(wb = wb, file = hot_file, overwrite = TRUE) )
+                       #   
+                       #   }
+                       #   
+                       # }
+                       shiny::incProgress(30/30, message = "exporting fieldbook file (excel)")     
                        try(openxlsx::saveWorkbook(wb = wb, file = hot_file, overwrite = TRUE) )
 
-                   print("ejecucion")
-                   try(shell.exec(hot_file))
+                       print("ejecucion")
+                       try(shell.exec(hot_file))
 
                    }
                  })
@@ -1159,8 +1354,21 @@ fbcheck_server <- function(input, output, session, values) {
 
     #For many fieldbooks
 
-
-
-  })
+    })
   }) #end try
+  
+  #Export button: This event export and show the excel file for FieldBookApp-SPBase connection
+  output$downloadData <- downloadHandler(
+    filename = function() {
+      paste('data-', Sys.Date(), '.csv', sep='')
+    },
+    content = function(con) {
+      write.csv(data, con)
+    }
+  )
+
+  # In ui.R:
+  downloadLink('downloadData', 'Download')
+  
+  
 }

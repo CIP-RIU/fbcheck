@@ -66,10 +66,28 @@ testthat::test_that("Organoleptic Baby with just one empty form",{
 })
 
 
-
-
-
-
-
-#F6_organoleptic_mother <- saveRDS(datos,"tests/testthat/F6_organoleptic_mother.rds")
+# test_that("Organoleptic form with some panelist evaluating some genotypes", {
+# 
+#   f6_evalxpanelgroup  <- readxl::read_excel(path = "excel/PTPVS112016_CAÑAYPATA_exp1.xlsx", sheet = "F6_organoleptic_mother")
+#   datos <- as.data.frame(f6_evalxpanelgroup)
+#   form <- datos
+#   form <- split_tidy_form(form = form) #DF_f6 was changed by form argument
+#   
+#   names_form <- names(form)
+#   library(tidyr)
+#   library(dplyr)
+#   library(stringr)
+#   out_table<- lapply(X = names_form, function(x) out_form_table(form[[x]])  )
+#   
+#   out_table <- data.table::rbindlist(out_table)
+#   print(out_table)
+#   out_table_fn <- as.data.frame(out_table)
+#   
+#   print(out_table_fn)
+#   
+#   out_table_fn <- out_table_fn %>% purrr::map_at(c(2,3,4), as.numeric) %>%  as.data.frame(.,stringsAsFactors =TRUE)
+#   
+#   
+#   
+# })
 

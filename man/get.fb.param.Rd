@@ -16,4 +16,3 @@ get.fb.param(fp, sheet, param)
 \description{
 This function gets parameters or values from fieldbook excel file. Do an excel scrapping.
 }
-

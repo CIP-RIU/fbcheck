@@ -251,6 +251,57 @@ form_parameters <- function(list_form) {
 }
 
 
+#' FieldBookApp Data Processing --------------------------------------------
+#'
+#' @param fieldbook fieldbook from FieldBookApp to HIDAP
+#' @author Omar Benites
+#' @description Return pvs form parameters
+#' @export
+#'
+fbapp2hidap <- function(fieldbook){
+
+    #ToDo: warning: there is no  plot_name
+    dt <- fieldbook
+    dtPlotName_temp <- stringr::str_split_fixed(dt$plot_name, "_", 4) %>% as.data.frame() #split by first three "_"
+    names(dtPlotName_temp) <- c("abbr_user", "plot_number", "rep", "accesion_name")
+    dt$plot_name <- NULL #remove plot_name
+    dt2 <- cbind(dtPlotName_temp, dt) #Bind factors with other variables
+    
+    ## composition of database headers or atributtes
+    library(dplyr)
+    library(tidyr)
+    dt2 <- dt2 %>% tidyr::separate(trait , c("Header", "CO_ID"), sep = "\\|")
+    library(stringr)
+    dt2$Header <- stringr::str_trim(dt2$Header, side = "both")
+    dt2$CO_ID <- stringr::str_trim(dt2$CO_ID, side = "both")
+    dt3 <- dt2 %>% tidyr::unite(TRAIT, Header, CO_ID, sep = "-")
+    
+    #Get column numbers
+    colTr_index <- which(names(dt3) %in% c("TRAIT","value") )#tranpuesta fb
+    colOther_index <- setdiff(1:ncol(dt3), colTr_index) #the rest of columns
+    dt3 <- dt3 [, c(colOther_index, colTr_index)]
+    dt4 <- dt3 %>% tidyr::spread(TRAIT, value) #tranpose data or gather data
+    
+    out <- dt4 %>% as.data.frame(stringsAsFactors=FALSE)
+    out
+
+}
 
 
-
+#' FieldBookApp Data Processing --------------------------------------------
+#'
+#' @param fieldbook fieldbook from HIDAP to FieldBookApp
+#' @author Omar Benites
+#' @description Return pvs form parameters
+#' @export
+#'
+hidap2fbApp <- function(fieldbook) {
+    #ToDo: warning: there is no  abbr_user, plot_number, rep, accesion_name columns
+      
+    fbdb <- fieldbook 
+    fbdb1 <- fbdb %>% tidyr::unite(plot_name, abbr_user, plot_number, rep, accesion_name, sep = "_")
+    trait_names <- names(fbdb1)[grepl("CO", x = names(fbdb1))]
+    fbdb2 <- fbdb1 %>% gather_("trait", "value", names(fbdb1)[grepl("CO", x = names(fbdb1))])
+    fbdb2$trait <-  str_replace_all(fbdb2$trait, pattern = "-", "|" )
+    fbdb2
+}

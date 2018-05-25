@@ -17,4 +17,3 @@ get the x values from organoleptic forms
 \author{
 Omar Benites
 }
-
