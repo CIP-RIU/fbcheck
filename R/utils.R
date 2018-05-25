@@ -261,6 +261,29 @@ form_parameters <- function(list_form) {
 fbapp2hidap <- function(fieldbook){
 
     #ToDo: warning: there is no  plot_name
+    # dt <- fieldbook
+    # dtPlotName_temp <- stringr::str_split_fixed(dt$plot_name, "_", 4) %>% as.data.frame() #split by first three "_"
+    # names(dtPlotName_temp) <- c("abbr_user", "plot_number", "rep", "accesion_name")
+    # dt$plot_name <- NULL #remove plot_name
+    # dt2 <- cbind(dtPlotName_temp, dt) #Bind factors with other variables
+    # 
+    # ## composition of database headers or atributtes
+    # library(dplyr)
+    # library(tidyr)
+    # dt2 <- dt2 %>% tidyr::separate(trait , c("Header", "CO_ID"), sep = "\\|")
+    # library(stringr)
+    # dt2$Header <- stringr::str_trim(dt2$Header, side = "both")
+    # dt2$CO_ID <- stringr::str_trim(dt2$CO_ID, side = "both")
+    # dt3 <- dt2 %>% tidyr::unite(TRAIT, Header, CO_ID, sep = "-")
+    # 
+    # #Get column numbers
+    # colTr_index <- which(names(dt3) %in% c("TRAIT","value") )#tranpuesta fb
+    # colOther_index <- setdiff(1:ncol(dt3), colTr_index) #the rest of columns
+    # dt3 <- dt3 [, c(colOther_index, colTr_index)]
+    # dt4 <- dt3 %>% tidyr::spread(TRAIT, value) #tranpose data or gather data
+    # 
+    # out <- dt4 %>% as.data.frame(stringsAsFactors=FALSE)
+    # out
     dt <- fieldbook
     dtPlotName_temp <- stringr::str_split_fixed(dt$plot_name, "_", 4) %>% as.data.frame() #split by first three "_"
     names(dtPlotName_temp) <- c("abbr_user", "plot_number", "rep", "accesion_name")
@@ -268,22 +291,31 @@ fbapp2hidap <- function(fieldbook){
     dt2 <- cbind(dtPlotName_temp, dt) #Bind factors with other variables
     
     ## composition of database headers or atributtes
+    #abbre_user_give + #plot_number+ #rep/block+ #accesion_name(germoplasm_name)
     library(dplyr)
     library(tidyr)
+    #dt2 <- data.frame(trait = dt$trait)
     dt2 <- dt2 %>% tidyr::separate(trait , c("Header", "CO_ID"), sep = "\\|")
+    
+    #ToDo 1: remove white spaces in values for all columns.
     library(stringr)
+    
     dt2$Header <- stringr::str_trim(dt2$Header, side = "both")
     dt2$CO_ID <- stringr::str_trim(dt2$CO_ID, side = "both")
+    
+    #dt3 <- dt2 %>% mutate(TRAIT = paste(Header, "_", CO_ID, sep = ""))
+    #ToDo: after create TRAIT column, remove: Header and CO_ID
     dt3 <- dt2 %>% tidyr::unite(TRAIT, Header, CO_ID, sep = "-")
     
-    #Get column numbers
-    colTr_index <- which(names(dt3) %in% c("TRAIT","value") )#tranpuesta fb
-    colOther_index <- setdiff(1:ncol(dt3), colTr_index) #the rest of columns
-    dt3 <- dt3 [, c(colOther_index, colTr_index)]
-    dt4 <- dt3 %>% tidyr::spread(TRAIT, value) #tranpose data or gather data
-    
-    out <- dt4 %>% as.data.frame(stringsAsFactors=FALSE)
-    out
+    dt3<- dt3 %>% unite(super_plot_name, abbr_user, plot_number, rep, accesion_name , timestamp, person ,location ,number, sep = "--")
+    dt4<- dt3 %>% group_by(super_plot_name, TRAIT) %>% 
+                  mutate(id= 1:n() ) %>%
+                  melt(id=c("super_plot_name", "id", "TRAIT")) %>%
+                  dcast(... ~ TRAIT + variable, value.var="value")
+    col_names <- gsub(pattern =  "_value", replacement = "", names(dt4))
+    colnames(dt4) <- col_names
+    dt5<- dt4 %>% tidyr::separate( super_plot_name, c("abbr_user", "plot_number", "rep", "accesion_name" , "timestamp", "person" ,"location" ,"number"), sep= "--")
+    out <- dt5
 
 }
 
@@ -298,10 +330,21 @@ fbapp2hidap <- function(fieldbook){
 hidap2fbApp <- function(fieldbook) {
     #ToDo: warning: there is no  abbr_user, plot_number, rep, accesion_name columns
       
-    fbdb <- fieldbook 
-    fbdb1 <- fbdb %>% tidyr::unite(plot_name, abbr_user, plot_number, rep, accesion_name, sep = "_")
-    trait_names <- names(fbdb1)[grepl("CO", x = names(fbdb1))]
-    fbdb2 <- fbdb1 %>% gather_("trait", "value", names(fbdb1)[grepl("CO", x = names(fbdb1))])
-    fbdb2$trait <-  str_replace_all(fbdb2$trait, pattern = "-", "|" )
-    fbdb2
+     fbdb <- fieldbook 
+    # fbdb1 <- fbdb %>% tidyr::unite(plot_name, abbr_user, plot_number, rep, accesion_name, sep = "_")
+    # trait_names <- names(fbdb1)[grepl("CO", x = names(fbdb1))]
+    # fbdb2 <- fbdb1 %>% gather_("trait", "value", names(fbdb1)[grepl("CO", x = names(fbdb1))])
+    # fbdb2$trait <-  str_replace_all(fbdb2$trait, pattern = "-", "|" )
+    # fbdb2
+     fbdb1 <- fbdb %>% tidyr::unite(super_plot_name, abbr_user, plot_number, rep, accesion_name , timestamp, person ,location ,number, sep = "--")
+     
+     #fbdb1 <- fbdb %>% tidyr::unite(plot_name, abbr_user, plot_number, rep, accesion_name, sep = "_")
+     trait_names <- names(fbdb1)[grepl("CO", x = names(fbdb1))]
+     fbdb2 <- fbdb1 %>% dplyr::gather_("trait", "value", names(fbdb1)[grepl("CO", x = names(fbdb1))])
+     fbdb2$trait <-  stringr::str_replace_all(fbdb2$trait, pattern = "-", "|" )
+     #head(fbdb2)
+     fbdb3 <- fbdb2 %>% tidyr::separate( super_plot_name, c("abbr_user", "plot_number", "rep", "accesion_name" , "timestamp", "person" ,"location" ,"number"), sep= "--")
+     fbdb3 <- fbdb3 %>% tidyr::unite(plot_name, abbr_user, plot_number, rep ,accesion_name)   
+     fbdb3<- dplyr::filter(fbdb3, value!="NA") 
+     out <- fbdb3  
 }

@@ -290,6 +290,7 @@ fbcheck_server <- function(input, output, session, values) {
     values<-  shiny::reactiveValues(
         hot_btable = hot_bdata()
     )
+<<<<<<< HEAD
       
       DF <- NULL
       
@@ -301,6 +302,46 @@ fbcheck_server <- function(input, output, session, values) {
       }
       
       print("print DF")
+=======
+
+    DF <- NULL
+
+    if (!is.null(input$hot_btable)) {
+      DF = hot_to_r(input$hot_btable)
+      values[["hot_btable"]] = DF
+    } else if (!is.null(values[["hot_btable"]])) {
+      DF = values[["hot_btable"]]
+    }
+
+    if(input$calculate>0){
+
+      hot_plot_size <- as.numeric(hot_params()$hot_plot_size)
+
+      hot_plant_den <- as.numeric(hot_params()$hot_plant_den)
+
+      DF = values[["hot_btable"]]
+      DF <- as.data.frame(DF)
+      DF <- traittools::calculate_trait_variables(fb = DF,plot_size = hot_plot_size,
+                                      plant_den = hot_plant_den,mgt = hot_mgt(),mtl=hot_mtl(),trial_type=hot_trial())
+      #print(DF)
+    }
+
+    if(!is.null(DF)){
+
+      traits <- get_trait_fb(DF)
+
+      ##begin fbglobal
+      path <- fbglobal::get_base_dir()
+      path <- paste(path,"hot_fieldbook.rds", sep="\\")
+      saveRDS(DF, path)
+
+      #enf fbglobal
+
+      #saveRDS(DF,"hot_fieldbook.rds")
+
+      crop <- hot_crop()
+      trial <- hot_trial()
+>>>>>>> c2cbf914e3dca5464afa5d69a767a130c67306c3
       print(DF)
     
       if(!is.null(DF)){
