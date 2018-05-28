@@ -142,33 +142,27 @@ fbcheck_server_sbase <- function(input, output, session, values) {
       DF = values[["hot_btable_fbapp_sbase"]]
     }
     
-    if(input$calculate_sbase>0){
+    # if(input$calculate_sbase>0){
+    # 
+    #   DF <- values[["hot_btable_fbapp_sbase"]]
+    #   DF <- rhandsontable_update(DF)
+    #   #DF <- temp
+    # }
 
-      DF <- values[["hot_btable_fbapp_sbase"]]
-      DF <- rhandsontable_update(DF)
-      #DF <- temp
-    }
-    
-    #print("print DF")
-    #print(DF)
     
     if(!is.null(DF)){
       
       #dsource <- hot_formatFile_sbase()
       #if(dsource=="FieldBookApp-SPBase") dsource <- 2
       dsource <- 2
-      
       traits <- traittools::get_trait_fb(DF, dsource = dsource)
       #print(traits)
-      
-      ##begin fbglobal
-      path <- fbglobal::get_base_dir()
+      path <- fbglobal::get_base_dir() ##begin fbglobal
       #print(path)
       path <- file.path(path,"hot_fieldbook_sbase.rds")
       #print(path)
       saveRDS(DF, path)
       #enf fbglobal
-      
       #print("checking with crop ontology")
       crop <- hot_crop_sbase()
       #trait_dict <- get_crop_ontology(crop = crop,trial = trial)
@@ -239,9 +233,9 @@ fbcheck_server_sbase <- function(input, output, session, values) {
     },
     content = function(con) {
       path <- fbglobal::get_base_dir()
-      print(path)
+      #print(path)
       path <-  file.path(path,"hot_fieldbook_sbase.rds")
-      print(path)
+      #print(path)
       DF <- readRDS(path)
       fb<- hidap2fbApp(fieldbook = DF)
       write.csv(fb, con,row.names = FALSE)

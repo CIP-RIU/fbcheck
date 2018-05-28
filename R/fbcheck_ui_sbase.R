@@ -25,7 +25,7 @@ fbcheck_ui_sbase <- function(type="tab", title="Data Quality and Processing", na
                             #   condition = "input.fbdesign_dsource_sbase == 'HIDAP'",
                             #   
                             #   try(shinyFiles::shinyFilesButton('file_sbase', 'File select', 'Please select a file',FALSE)),
-                               shiny::actionButton("calculate_sbase", "Calculate",icon("play-circle-o")),
+                            #   shiny::actionButton("calculate_sbase", "Calculate",icon("play-circle-o")),
                             #   HTML('<div style="float: right; margin: 0 5px 5px 10px;">'),
                             #   shiny::actionLink('exportButton_sbase', 'Download data'),
                             #   HTML('</div>'),
@@ -48,10 +48,10 @@ fbcheck_ui_sbase <- function(type="tab", title="Data Quality and Processing", na
                                 shiny::fileInput(inputId = "file_fbapp_sbase", label = "Choose CSV File", multiple = FALSE,
                                                  accept = c("text/csv","text/comma-separated-values,text/plain", ".csv")),
                             
+                               
+                                HTML('<div style="float: right; margin: 0 5px 5px 10px;">'),
                                 shiny::downloadLink('downloadData', 'Download'),
-                                # HTML('<div style="float: right; margin: 0 5px 5px 10px;">'),
-                                # shiny::actionLink('exportButton_fbapp_sbase', 'Download data'),
-                                # HTML('</div>')#,
+                                HTML('</div>'),
                              # )
                             #),
                             
@@ -86,17 +86,17 @@ fbcheck_ui_sbase <- function(type="tab", title="Data Quality and Processing", na
                                             
                                             #conditionalPanel(
                                             #  condition = "input.fbdesign_dsource_sbase == 'FieldBookApp-SPBase'",
-                                              
-                                              box(rHandsontableOutput("hot_btable_fbapp_sbase",height = "1400px",width = "1000px"),
+                                            
+                                              box(rHandsontableOutput("hot_btable_fbapp_sbase",height = "100%",width = "100%"),
                                                   height = "3400px",width ="2400px"),
                                             #),
                                             
                                             #                                      ),
                                             
                                             tags$style(type='text/css', "#file_sbase { width:150px; margin-top: 25px;}"),
-                                            tags$style(HTML('#file_sbase {background-color:#0099cc; color: #ffffff}')),  
-                                            tags$style(type='text/css', "#calculate_sbase { width:150px; margin-top: 25px;}"),
-                                            tags$style(HTML('#calculate_sbase {background-color:#21b073; color: #ffffff}'))
+                                            tags$style(HTML('#file_sbase {background-color:#0099cc; color: #ffffff}'))#,  
+                                            #tags$style(type='text/css', "#calculate_sbase { width:150px; margin-top: 25px;}"),
+                                            #tags$style(HTML('#calculate_sbase {background-color:#21b073; color: #ffffff}'))
                                             
                                    )
                                    
