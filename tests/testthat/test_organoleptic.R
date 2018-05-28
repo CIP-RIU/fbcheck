@@ -68,7 +68,7 @@ testthat::test_that("Organoleptic Baby with just one empty form",{
 
 # test_that("Organoleptic form with some panelist evaluating some genotypes", {
 # 
-#   f6_evalxpanelgroup  <- readxl::read_excel(path = "excel/PTPVS112016_CAÑAYPATA_exp1.xlsx", sheet = "F6_organoleptic_mother")
+#   f6_evalxpanelgroup  <- readxl::read_excel(path = "excel/PTPVS112016_CANAYPATA_exp1.xlsx", sheet = "F6_organoleptic_mother")
 #   datos <- as.data.frame(f6_evalxpanelgroup)
 #   form <- datos
 #   form <- split_tidy_form(form = form) #DF_f6 was changed by form argument

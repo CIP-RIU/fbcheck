@@ -292,13 +292,12 @@ fbapp2hidap <- function(fieldbook){
     
     ## composition of database headers or atributtes
     #abbre_user_give + #plot_number+ #rep/block+ #accesion_name(germoplasm_name)
-    library(dplyr)
-    library(tidyr)
+    #library(dplyr)
+    #library(tidyr)
     #dt2 <- data.frame(trait = dt$trait)
     dt2 <- dt2 %>% tidyr::separate(trait , c("Header", "CO_ID"), sep = "\\|")
     
     #ToDo 1: remove white spaces in values for all columns.
-    library(stringr)
     
     dt2$Header <- stringr::str_trim(dt2$Header, side = "both")
     dt2$CO_ID <- stringr::str_trim(dt2$CO_ID, side = "both")
@@ -308,10 +307,10 @@ fbapp2hidap <- function(fieldbook){
     dt3 <- dt2 %>% tidyr::unite(TRAIT, Header, CO_ID, sep = "-")
     
     dt3<- dt3 %>% unite(super_plot_name, abbr_user, plot_number, rep, accesion_name , timestamp, person ,location ,number, sep = "--")
-    dt4<- dt3 %>% group_by(super_plot_name, TRAIT) %>% 
-                  mutate(id= 1:n() ) %>%
-                  melt(id=c("super_plot_name", "id", "TRAIT")) %>%
-                  dcast(... ~ TRAIT + variable, value.var="value")
+    dt4<- dt3 %>% dplyr::group_by(super_plot_name, TRAIT) %>% 
+                  dplyr::mutate(id= 1:n() ) %>%
+                  data.table::melt(id=c("super_plot_name", "id", "TRAIT")) %>%
+                  data.table::dcast(... ~ TRAIT + variable, value.var="value")
     col_names <- gsub(pattern =  "_value", replacement = "", names(dt4))
     colnames(dt4) <- col_names
     dt5<- dt4 %>% tidyr::separate( super_plot_name, c("abbr_user", "plot_number", "rep", "accesion_name" , "timestamp", "person" ,"location" ,"number"), sep= "--")
@@ -340,11 +339,23 @@ hidap2fbApp <- function(fieldbook) {
      
      #fbdb1 <- fbdb %>% tidyr::unite(plot_name, abbr_user, plot_number, rep, accesion_name, sep = "_")
      trait_names <- names(fbdb1)[grepl("CO", x = names(fbdb1))]
-     fbdb2 <- fbdb1 %>% dplyr::gather_("trait", "value", names(fbdb1)[grepl("CO", x = names(fbdb1))])
+     fbdb2 <- fbdb1 %>% tidyr::gather_("trait", "value", names(fbdb1)[grepl("CO", x = names(fbdb1))])
      fbdb2$trait <-  stringr::str_replace_all(fbdb2$trait, pattern = "-", "|" )
      #head(fbdb2)
      fbdb3 <- fbdb2 %>% tidyr::separate( super_plot_name, c("abbr_user", "plot_number", "rep", "accesion_name" , "timestamp", "person" ,"location" ,"number"), sep= "--")
      fbdb3 <- fbdb3 %>% tidyr::unite(plot_name, abbr_user, plot_number, rep ,accesion_name)   
      fbdb3<- dplyr::filter(fbdb3, value!="NA") 
      out <- fbdb3  
+}
+
+#' Update rhandsontable
+#' @param fieldbook field data trough rhandsontable
+#' @description get updates from rhandonstable after user modifications
+#' @author Omar Benites 
+#' @export
+
+rhandsontable_update<- function(fieldbook){
+  fb <- as.data.frame(fieldbook)
+  temp <-fb
+  out <- temp 
 }

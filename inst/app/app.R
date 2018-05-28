@@ -16,7 +16,7 @@ tabNameS <- "data_processing"
 
 server <- function(input, output, session,values) {
   values = shiny::reactiveValues()
-  fbcheck::fbcheck_server(input, output, session, values = values)
+  fbcheck::fbcheck_server_sbase(input, output, session, values = values)
 }
 
 ui <- dashboardPage(skin = "yellow",
@@ -31,7 +31,7 @@ ui <- dashboardPage(skin = "yellow",
                     ),
                     dashboardBody(
                       tabItems(
-                        fbcheck::fbcheck_ui(name = tabNameS)
+                        fbcheck::fbcheck_ui_sbase(name = tabNameS)
                       )
                     )
 )
