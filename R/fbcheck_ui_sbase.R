@@ -11,6 +11,8 @@ fbcheck_ui_sbase <- function(type="tab", title="Data Quality and Processing", na
   #begin data_processing tabItem
   shinydashboard::tabItem(tabName = name,
                           h2(title),   
+                          shinyjs::useShinyjs(),
+                          shinyjs::extendShinyjs(text = "shinyjs.downloadData = function() { location.reload(); }"),
                           
                           # shinyWidgets::awesomeRadio(inputId = "fbdesign_dsource_sbase", 
                           #                            label = "Select data source", choices = c("HIDAP", 
@@ -47,7 +49,7 @@ fbcheck_ui_sbase <- function(type="tab", title="Data Quality and Processing", na
 
                                 shiny::fileInput(inputId = "file_fbapp_sbase", label = "Choose CSV File", multiple = FALSE,
                                                  accept = c("text/csv","text/comma-separated-values,text/plain", ".csv")),
-                            
+                                #actionButton('reset', 'Reset Input'),
                                
                                 HTML('<div style="float: right; margin: 0 5px 5px 10px;">'),
                                 shiny::downloadLink('downloadData', 'Download'),
@@ -75,7 +77,7 @@ fbcheck_ui_sbase <- function(type="tab", title="Data Quality and Processing", na
                                             #                                        HTML('<div style="float: right; margin: 0 5px 5px 10px;">'),
                                             #                                        shiny::actionLink('exportButton', 'Download data'),
                                             #                                        HTML('</div>'),
-                                            shinysky::shinyalert("alert_fb_warning_sbase", FALSE, auto.close.after = 4),
+                                            shinysky::shinyalert("alert_fbapp_warning_sbase", FALSE, auto.close.after = 4),
                                             
                                             # conditionalPanel(
                                             #   condition = "input.fbdesign_dsource_sbase == 'HIDAP'",

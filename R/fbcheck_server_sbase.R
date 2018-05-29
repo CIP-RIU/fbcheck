@@ -50,9 +50,18 @@ fbcheck_server_sbase <- function(input, output, session, values) {
       file_fbapp <- input$file_fbapp_sbase
       if (is.null(file_fbapp))  return(NULL)
       dt <- readr::read_csv(file_fbapp$datapath)
+      
+      if(!is.element("plot_name", names(dt))){ 
+        shinysky::showshinyalert(session, "alert_fbapp_warning_sbase", paste("ERROR: The file imported does not has 'plot_name' header."), styleclass = "danger")  
+      } else if(nrow(dt)==1){
+        shinysky::showshinyalert(session, "alert_fbapp_warning_sbase", paste("ERROR: Your data file has only one row of data. Please upload the right one. "), styleclass = "danger")  
+      } else {
+        hot_bdata <- fbapp2hidap(dt) 
+      }
+      
       #dt <- readr::read_csv(file ="D:\\HIDAP_DOCUMENTATION_AND_EXAMPLES\\HIDAP-SweetPotatoBase\\FieldBookApp\\formato para subir a la base de datos\\fbapp_trial1_sbase_bryanEllerbrock.csv")
       # Data wrangling ----------------------------------------------------------
-      hot_bdata <- fbapp2hidap(dt) 
+      
     #}
     
     hot_bdata
@@ -101,6 +110,21 @@ fbcheck_server_sbase <- function(input, output, session, values) {
       )
     }
   })
+  #### temp
+  
+  
+  
+  # output$tbl <- renderTable({
+  #   rv$data
+  # })
+  
+  
+  
+  ### end temp
+  
+  
+  
+  
   
   #Return the type of crop in Minimal sheet
   hot_crop_sbase <- reactive({
@@ -142,6 +166,8 @@ fbcheck_server_sbase <- function(input, output, session, values) {
       DF = values[["hot_btable_fbapp_sbase"]]
     }
     
+   
+    
     # if(input$calculate_sbase>0){
     # 
     #   DF <- values[["hot_btable_fbapp_sbase"]]
@@ -149,6 +175,9 @@ fbcheck_server_sbase <- function(input, output, session, values) {
     #   #DF <- temp
     # }
 
+    print("print DF")
+    print(DF)
+    print("end d")
     
     if(!is.null(DF)){
       
@@ -234,13 +263,38 @@ fbcheck_server_sbase <- function(input, output, session, values) {
     content = function(con) {
       path <- fbglobal::get_base_dir()
       #print(path)
+      shiny::withProgress(message = 'Downloading file', value = 0, {
+        
+        incProgress(1/6, detail = paste("Reading HIDAP data..."))
       path <-  file.path(path,"hot_fieldbook_sbase.rds")
+      
+      
       #print(path)
       DF <- readRDS(path)
+      
+      incProgress(2/6, detail = paste("Formatting hidap file..."))
+      
       fb<- hidap2fbApp(fieldbook = DF)
+      
+      incProgress(3/6, detail = paste("Downloading FieldBookApp-SPBase file..."))
+     
+      incProgress(4/6, detail = paste("Refreshing HIDAP..."))
+      
+      Sys.sleep(3)
+      incProgress(5/6, detail = paste("Refreshing HIDAP..."))
+    
       write.csv(fb, con,row.names = FALSE)
+      
+      incProgress(6/6, detail = paste("Refreshing HIDAP..."))
+      Sys.sleep(5)
+      shinyjs::js$downloadData()
+      })
+      
+      
     }
   )
   
   
 }
+
+
