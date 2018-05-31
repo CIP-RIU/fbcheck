@@ -41,33 +41,33 @@ fbcheck_server_sbase <- function(input, output, session, values) {
   # })
   # 
   #Read the fieldbook data
-  hot_bdata_sbase <- reactive({
-    
-    #file_type <- hot_formatFile_sbase()
-    
-    #1. Fieldbook from fieldbookapp
-    #if(file_type == "FieldBookApp-SPBase"){
-      file_fbapp <- input$file_fbapp_sbase
-      if (is.null(file_fbapp))  return(NULL)
-      dt <- readr::read_csv(file_fbapp$datapath)
-      
-      if(!is.element("plot_name", names(dt))){ 
-        shinysky::showshinyalert(session, "alert_fbapp_warning_sbase", paste("ERROR: The file imported does not has 'plot_name' header."), styleclass = "danger")  
-      } else if(nrow(dt)==1){
-        shinysky::showshinyalert(session, "alert_fbapp_warning_sbase", paste("ERROR: Your data file has only one row of data. Please upload the right one. "), styleclass = "danger")  
-      } else {
-        hot_bdata_sbase <- fbapp2hidap(dt) 
-      }
-      
-      #dt <- readr::read_csv(file ="D:\\HIDAP_DOCUMENTATION_AND_EXAMPLES\\HIDAP-SweetPotatoBase\\FieldBookApp\\formato para subir a la base de datos\\fbapp_trial1_sbase_bryanEllerbrock.csv")
-      # Data wrangling ----------------------------------------------------------
-      
-    #}
-    
-      hot_bdata_sbase
-    
-    
-  })
+  # hot_bdata_sbase <- reactive({
+  #   
+  #   #file_type <- hot_formatFile_sbase()
+  #   
+  #   #1. Fieldbook from fieldbookapp
+  #   #if(file_type == "FieldBookApp-SPBase"){
+  #     file_fbapp <- input$file_fbapp_sbase
+  #     if (is.null(file_fbapp))  return(NULL)
+  #     dt <- readr::read_csv(file_fbapp$datapath)
+  #     
+  #     if(!is.element("plot_name", names(dt))){ 
+  #       shinysky::showshinyalert(session, "alert_fbapp_warning_sbase", paste("ERROR: The file imported does not has 'plot_name' header."), styleclass = "danger")  
+  #     } else if(nrow(dt)==1){
+  #       shinysky::showshinyalert(session, "alert_fbapp_warning_sbase", paste("ERROR: Your data file has only one row of data. Please upload the right one. "), styleclass = "danger")  
+  #     } else {
+  #       hot_bdata_sbase <- fbapp2hidap(dt) 
+  #     }
+  #     
+  #     #dt <- readr::read_csv(file ="D:\\HIDAP_DOCUMENTATION_AND_EXAMPLES\\HIDAP-SweetPotatoBase\\FieldBookApp\\formato para subir a la base de datos\\fbapp_trial1_sbase_bryanEllerbrock.csv")
+  #     # Data wrangling ----------------------------------------------------------
+  #     
+  #   #}
+  #   
+  #     hot_bdata_sbase
+  #   
+  #   
+  # })
   
   #Return Installation sheet parameters
   # hot_params <- reactive({
@@ -143,7 +143,7 @@ fbcheck_server_sbase <- function(input, output, session, values) {
   #hot_btable represents fieldbook data
   output$hot_btable_fbapp_sbase <-  renderRHandsontable({
     
-
+    ####### Import CSV data #######
     file_fbapp <- input$file_fbapp_sbase
     #print(file_fbapp)
     if (is.null(file_fbapp)) {
@@ -153,8 +153,7 @@ fbcheck_server_sbase <- function(input, output, session, values) {
     }
     
    
-   
-    
+    ####### Show Warnings to users   #######
     if(!is.element("plot_name", names(dt))){ 
       shinysky::showshinyalert(session, "alert_fbapp_warning_sbase", paste("ERROR: The file imported does not has 'plot_name' header."), styleclass = "danger")  
     } else if(nrow(dt)==1){
@@ -163,27 +162,41 @@ fbcheck_server_sbase <- function(input, output, session, values) {
       hot_bdata_sbase2 <- fbapp2hidap(fieldbook = dt) 
     }
   
+    
+    ####### Create Unique ID ######## 
+    servName <- "fbappdatapath.rds"
+    uploadDate  <- as.character(Sys.time(), "%Y%m%d%H%M%S")
+    ranStr <-  stri_rand_strings(1, 15,  '[a-zA-Z0-9]')
+    servName <- paste(uploadDate, ranStr, servName , sep= "-") #nombre sin extensions!!!!
+    dirNameExtFile <- fbglobal::get_base_dir() #get directory of the file with fileName
+   
+    
+    ####### Reactive values  #######
     hot_bdata_sbase <- hot_bdata_sbase2 
-  
-    values <-  shiny::reactiveValues(
-      hot_btable_fbapp_sbase = hot_bdata_sbase#()
-    )
- 
+      values <-  shiny::reactiveValues(
+        hot_btable_fbapp_sbase = hot_bdata_sbase#()
+      )
     DF <- NULL
 
-  
+    ####### Detect if hot_btable_fbapp_sbase has data  #######
     if (!is.null(input$hot_btable_fbapp_sbase)) {
       print("if 1")
       DF = hot_to_r(input$hot_btable_fbapp_sbase)
       #values[["hot_btable_fbapp_sbase"]] = DF
-      path <- fbglobal::get_base_dir()
-      if(file.exists(file.path(path, "fbappdatapath.rds") )){
-        
-        former_datapath <- readRDS(file = file.path(path, "fbappdatapath.rds"))
+      
+    ## Important Note: in case users upload different files, they will see:
+    dirNameExtFile <- fbglobal::get_base_dir()
+    #fileNameExtFile <-  paste(dirNameExtFile, "fbappdatapath.rds")
+    fileNameExtFile <-  paste0(dirNameExtFile, servName)
+      
+    #if(file.exists(file.path(dirNameExtFile, "fbappdatapath.rds") )){
+    if(file.exists(fileNameExtFile)) {    
+        former_datapath <- readRDS(file = fileNameExtFile)
         if(hot_fbapp_path()!= former_datapath){
           DF <- hot_bdata_sbase2
         } 
-      }
+    }
+      ###  end important note
       values[["hot_btable_fbapp_sbase"]] = DF
       
     } else if (!is.null(values[["hot_btable_fbapp_sbase"]])) {
@@ -191,47 +204,20 @@ fbcheck_server_sbase <- function(input, output, session, values) {
       print("if 2")
     } 
     
-    #hotr <<- hot_to_r(input$hot_btable_fbapp_sbase)
-    
-    
-#print(str(hot_bdata_sbase2))
-    #print(DF) 
-    # print(class(DF))
-    # print(str(DF))
-    # print(is.null(DF))
-    #print(hot_bdata_sbase2)
-    #print(all.equal(DF == hot_bdata_sbase2))
-    # fil <-file.path(fbglobal::get_base_dir(), "hot_fieldbook_sbase.rds")
-    # if(!is.null(DF)){
-    #   print("pasa 1")
-    #   if(identical(DF, hot_bdata_sbase2)) {
-    #     DF <- values[["hot_btable_fbapp_sbase"]]
-    #   } else {
-    #     DF <- hot_bdata_sbase2
-    #     values[["hot_btable_fbapp_sbase"]] = DF
-    #   }
-    # }
-    
-   
-    timestamp()
-    
+ 
     if(!is.null(DF)){
  
       dsource <- 2
       traits <- traittools::get_trait_fb(DF, dsource = dsource)
       #print(traits)
       path <- fbglobal::get_base_dir() ##begin fbglobal
-      print("is not null")
       path <- file.path(path,"hot_fieldbook_sbase.rds")
       saveRDS(DF, path)
       
       file_fbapp <- input$file_fbapp_sbase
-      rfbapp <- file_fbapp$datapath 
-      print(rfbapp)
+      value_datapath <- file_fbapp$datapath 
       datapath <- file.path(fbglobal::get_base_dir(), "fbappdatapath.rds")
-      print(datapath)
-      saveRDS(rfbapp, file =  datapath)
-      
+      saveRDS(value_datapath, file =  datapath)
       
       crop <- hot_crop_sbase()
       trait_dict <- get_crop_ontology(crop = crop, dsource = dsource)
@@ -240,59 +226,7 @@ fbcheck_server_sbase <- function(input, output, session, values) {
   })
   
   
-  
-  # output$fbcheck_genofilter_sbase <- renderUI({
-  #   #req(input$file)
-  #   ifelse("INSTN" %in% names(hot_bdata_sbase()) , sel <- "INSTN", sel <- 1)
-  #   
-  #   selectInput(inputId = "sel_fbcheck_genofilter_sbase",label = "Select Genotypes",choices = names(hot_bdata_sbase()),multiple = TRUE,selected = sel)
-  #   
-  # })
-  
-  
-  # output$fbcheck_factorfilter_sbase <- renderUI({
-  #   #req(input$file)
-  #   selectInput(inputId = "sel_fbcheck_factorfilter_sbase",label = "Summary by",choices = names(hot_bdata_sbase()),multiple = TRUE,selected = 1)
-  #   
-  # })
-
-  
-  #Download  
-  # output$exportButton_fbapp_sbase <- downloadHandler(
-  #   filename = function() {
-  #     paste('data-', Sys.Date(), '.csv', sep='')
-  #   },
-  #   content = function(con) {
-  #     
-  #     path <- fbglobal::get_base_dir()
-  #     path <- paste(path,"hot_fieldbook_sbase.rds", sep="\\")
-  #     DF <- readRDS(path)
-  #     fb <- hidap2fbApp(fieldbook = DF)
-  #     
-  #     write.csv(x = fb, con)
-  #   }
-  # )
-
-
-  
-
-  #Visualize the list of traits using web tables
-  # output$hot_td_trait = renderRHandsontable({
-  #   td_trait <- orderBy(~ABBR, td_trait)
-  #   rhandsontable(data = td_trait)
-  # })
-  
-  #Export button: This event export and show the excel file which has been checked out.
-  # shiny::observeEvent(input$exportButton,{
-  #   
-  #   #Begin Try
-  #   try({
-  #     
-  #     #For many fieldbooks
-  #     
-  #   })
-  # }) #end try
-  
+ 
   #Export button: This event export and show the excel file for FieldBookApp-SPBase connection
   
   output$downloadData <- downloadHandler(
@@ -303,13 +237,21 @@ fbcheck_server_sbase <- function(input, output, session, values) {
       path <- fbglobal::get_base_dir()
       #print(path)
       shiny::withProgress(message = 'Downloading file', value = 0, {
-        
+      
+      # print("datos directos")
+      #   
+      # print(hot_to_r(input$hot_btable_fbapp_sbase))  
+      # 
+      # print("datos values")
+          
         incProgress(1/6, detail = paste("Reading HIDAP data..."))
       path <-  file.path(path,"hot_fieldbook_sbase.rds")
       
       
       #print(path)
-      DF <- readRDS(path)
+      #DF <- readRDS(path) # Important note: run local 
+      
+      DF <- hot_to_r(input$hot_btable_fbapp_sbase) # Important note: run server
       
       incProgress(2/6, detail = paste("Formatting hidap file..."))
       
