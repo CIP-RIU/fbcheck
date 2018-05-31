@@ -27,7 +27,7 @@ fbcheck_ui_sbase <- function(type="tab", title="Data Quality and Processing", na
                             #   condition = "input.fbdesign_dsource_sbase == 'HIDAP'",
                             #   
                             #   try(shinyFiles::shinyFilesButton('file_sbase', 'File select', 'Please select a file',FALSE)),
-                               shiny::actionButton("calculate_sbase", "Calculate",icon("play-circle-o")),
+                            #   shiny::actionButton("calculate_sbase", "Calculate",icon("play-circle-o")),
                             #   HTML('<div style="float: right; margin: 0 5px 5px 10px;">'),
                             #   shiny::actionLink('exportButton_sbase', 'Download data'),
                             #   HTML('</div>'),
