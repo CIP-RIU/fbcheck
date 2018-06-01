@@ -140,6 +140,19 @@ fbcheck_server_sbase <- function(input, output, session, values) {
     
   })
 
+  fileNameExtFile <- reactive({
+    
+    servName <- "fbappdatapath.rds"
+    uploadDate  <- as.character(Sys.time(), "%Y%m%d%H%M%S")
+    ranStr <-  stri_rand_strings(1, 15,  '[a-zA-Z0-9]')
+    servName <- paste(uploadDate, ranStr, servName , sep= "-") #nombre sin extensions!!!!
+    dirNameExtFile <- fbglobal::get_base_dir() #get directory of the file with fileName
+    fileNameExtFile <-  paste0(dirNameExtFile, servName)
+    
+  })
+  
+  
+  
   #hot_btable represents fieldbook data
   output$hot_btable_fbapp_sbase <-  renderRHandsontable({
     
@@ -151,7 +164,7 @@ fbcheck_server_sbase <- function(input, output, session, values) {
     } else {  
       dt <- readr::read_csv(file_fbapp$datapath)
     }
-    
+   
    
     ####### Show Warnings to users   #######
     if(!is.element("plot_name", names(dt))){ 
@@ -159,9 +172,10 @@ fbcheck_server_sbase <- function(input, output, session, values) {
     } else if(nrow(dt)==1){
       shinysky::showshinyalert(session, "alert_fbapp_warning_sbase", paste("ERROR: Your data file has only one row of data. Please upload the right one. "), styleclass = "danger")  
     } else {
-      hot_bdata_sbase2 <- fbapp2hidap(fieldbook = dt) 
+      hot_bdata_sbase2 <- fbapp2hidap(fieldbook = dt)
     }
   
+    #print(head(hot_bdata_sbase2))
     
     ####### Create Unique ID ######## 
     servName <- "fbappdatapath.rds"
@@ -169,7 +183,9 @@ fbcheck_server_sbase <- function(input, output, session, values) {
     ranStr <-  stri_rand_strings(1, 15,  '[a-zA-Z0-9]')
     servName <- paste(uploadDate, ranStr, servName , sep= "-") #nombre sin extensions!!!!
     dirNameExtFile <- fbglobal::get_base_dir() #get directory of the file with fileName
+    fileNameExtFile <-  paste0(dirNameExtFile, servName)
    
+    fileNameExtFile<- fileNameExtFile()
     
     ####### Reactive values  #######
     hot_bdata_sbase <- hot_bdata_sbase2 
@@ -178,46 +194,40 @@ fbcheck_server_sbase <- function(input, output, session, values) {
       )
     DF <- NULL
 
-    ####### Detect if hot_btable_fbapp_sbase has data  #######
-    if (!is.null(input$hot_btable_fbapp_sbase)) {
-      print("if 1")
-      DF = hot_to_r(input$hot_btable_fbapp_sbase)
-      #values[["hot_btable_fbapp_sbase"]] = DF
+
+  
+    if(!is.null(input$hot_btable_fbapp_sbase)) {
+       DF = hot_to_r(input$hot_btable_fbapp_sbase)
+       
       
-    ## Important Note: in case users upload different files, they will see:
-    dirNameExtFile <- fbglobal::get_base_dir()
-    #fileNameExtFile <-  paste(dirNameExtFile, "fbappdatapath.rds")
-    fileNameExtFile <-  paste0(dirNameExtFile, servName)
-      
-    #if(file.exists(file.path(dirNameExtFile, "fbappdatapath.rds") )){
-    if(file.exists(fileNameExtFile)) {    
-        former_datapath <- readRDS(file = fileNameExtFile)
-        if(hot_fbapp_path()!= former_datapath){
-          DF <- hot_bdata_sbase2
-        } 
-    }
+          if(file.exists(fileNameExtFile)) {    
+            former_datapath <- readRDS(file = fileNameExtFile)
+            if(hot_fbapp_path()!= former_datapath){
+            #if(!identical(hot_bdata_sbase2, DF)){
+            #if(flag1) {
+             DF <- hot_bdata_sbase2
+            } 
+          }
       ###  end important note
       values[["hot_btable_fbapp_sbase"]] = DF
-      
     } else if (!is.null(values[["hot_btable_fbapp_sbase"]])) {
       DF = values[["hot_btable_fbapp_sbase"]]
-      print("if 2")
     } 
     
+ 
+
  
     if(!is.null(DF)){
  
       dsource <- 2
       traits <- traittools::get_trait_fb(DF, dsource = dsource)
-      #print(traits)
-      path <- fbglobal::get_base_dir() ##begin fbglobal
-      path <- file.path(path,"hot_fieldbook_sbase.rds")
-      saveRDS(DF, path)
-      
+
       file_fbapp <- input$file_fbapp_sbase
       value_datapath <- file_fbapp$datapath 
-      datapath <- file.path(fbglobal::get_base_dir(), "fbappdatapath.rds")
-      saveRDS(value_datapath, file =  datapath)
+      fileNameExtFile <- paste0(dirNameExtFile, servName) #file.path(fbglobal::get_base_dir(), "fbappdatapath.rds")
+
+      saveRDS(value_datapath, file =  fileNameExtFile())
+      
       
       crop <- hot_crop_sbase()
       trait_dict <- get_crop_ontology(crop = crop, dsource = dsource)
