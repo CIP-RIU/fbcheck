@@ -191,7 +191,7 @@ fbcheck_server_sbase <- function(input, output, session, values) {
       
     #if(file.exists(file.path(dirNameExtFile, "fbappdatapath.rds") )){
     if(file.exists(fileNameExtFile)) {    
-        former_datapath <- readRDS(file = fileNameExtFile)
+        former_datapath <- readRDS(fle = fileNameExtFile)
         if(hot_fbapp_path()!= former_datapath){
           DF <- hot_bdata_sbase2
         } 
@@ -225,8 +225,6 @@ fbcheck_server_sbase <- function(input, output, session, values) {
     }
   })
   
-  
- 
   #Export button: This event export and show the excel file for FieldBookApp-SPBase connection
   
   output$downloadData <- downloadHandler(

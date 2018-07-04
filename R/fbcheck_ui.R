@@ -9,16 +9,53 @@
 fbcheck_ui <- function (type = "tab", title = "Data Quality and Processing", 
                         name = "data_processing") 
 {
-  shinydashboard::tabItem(tabName = name, h2(title), box(title = " ", 
-                                                         status = "primary", solidHeader = TRUE, collapsible = TRUE, 
-                                                         width = NULL, try(shinyFiles::shinyFilesButton("file", 
-                                                                                                        "File select", "Please select a file", FALSE)), shiny::actionButton("calculate",
-                                                                                                                                                                            "Calculate", icon("play-circle-o")), HTML("<div style=\"float: right; margin: 0 5px 5px 10px;\">"),
-                                                         shiny::actionLink("exportButton", "Download data"), HTML("</div>"),
-                                                         br(), br(), tabBox(
-                                                           width = 12,
-                                                           tabPanel(
+  shinydashboard::tabItem(tabName = name, 
+                          h2(title),
+                          box(title = " ", status = "primary", solidHeader = TRUE, collapsible = TRUE, 
+                                                         width = NULL, 
+                              
+                              shinyWidgets::awesomeRadio(inputId = "fbcheck_type_Import", 
+                                                         label = "Radio buttons", choices = c("HIDAP", "FieldBookApp-SPBase"),
+                                                         selected = "HIDAP", inline = TRUE, checkbox = TRUE),
+                              
+                              conditionalPanel(condition = "input.fbcheck_type_Import == 'HIDAP'",
+                              
+                                            try(shinyFiles::shinyFilesButton("file","File select", "Please select a file", FALSE)),
+                                            shiny::actionButton("calculate","Calculate", icon("play-circle-o")),
+                                            HTML("<div style=\"float: right; margin: 0 5px 5px 10px;\">"),
+                                            shiny::actionLink("exportButton", "Download"),
+                                            HTML("</div>")#,
+                             ),
+                             
+                             conditionalPanel(condition = "input.fbcheck_type_Import == 'FieldBookApp-SPBase'",
+                             
+                                              shiny::fileInput(inputId = "file_fbapp_sbase", label = "Choose CSV File", multiple = FALSE,
+                                                               accept = c("text/csv","text/comma-separated-values,text/plain", ".csv")),
+                                              #actionButton('reset', 'Reset Input'),
+                                              
+                                              HTML('<div style="float: right; margin: 0 6px 6px 11px;">'),
+                                              shiny::downloadLink('downloadData', 'Download FieldBookApp file'),
+                                              HTML('</div>')         
+                                              
+                             
+                             ), 
+                              
+                                                         br(), 
+                                                        br(), 
+                              tabBox(
+                                         width = 12,
+                                          tabPanel(
                                                              "Standard Modules",
+                                                             
+                                                             # try(shinyFiles::shinyFilesButton("file","File select", "Please select a file", FALSE)), 
+                                                             # shiny::actionButton("calculate","Calculate", icon("play-circle-o")), 
+                                                             # HTML("<div style=\"float: right; margin: 0 5px 5px 10px;\">"),
+                                                             # shiny::actionLink("exportButton", "Download data"), 
+                                                             # HTML("</div>"),
+                                                             
+                                                             
+                                                      conditionalPanel(condition = "input.fbcheck_type_Import == 'HIDAP'",
+                                                             
                                                              uiOutput("fbcheck_genofilter"),
                                                              uiOutput("fbcheck_factorfilter"),
                                                              shinysky::shinyalert("alert_fb_warning", FALSE, auto.close.after = 4),
@@ -36,8 +73,16 @@ fbcheck_ui <- function (type = "tab", title = "Data Quality and Processing",
                                                              tags$style(HTML(
                                                                "#calculate {background-color:#21b073; color: #ffffff}"
                                                              ))
+                                                     ),
+                                                     conditionalPanel(condition = "input.fbcheck_type_Import == 'FieldBookApp-SPBase'",  
+                                                                      shinysky::shinyalert("alert_fbapp_warning_sbase", FALSE, auto.close.after = 4),          
+                                                                      box(rHandsontableOutput("hot_btable_fbapp_sbase",height = "100%",width = "100%"),
+                                                                          height = "3400px",width ="2400px")
+                                                                        
+                                                     )       
+                                                             
                                                            ),
-                                                           tabPanel("Special Modules", fluidRow(
+                                        tabPanel("Special Modules", fluidRow(
                                                              shinydashboard::tabBox(
                                                                title = "PVS",
                                                                id = "tabset1",
@@ -143,6 +188,10 @@ fbcheck_ui <- function (type = "tab", title = "Data Quality and Processing",
                                                                  )
                                                                )
                                                              )
-                                                           ))
-                                                         )), br(), br(), br())
+                                                           ))#,
+                                       
+                                        
+                                        
+                                                         )), br(), br(), br()
+        )
 }
