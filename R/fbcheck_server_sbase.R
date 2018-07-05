@@ -72,6 +72,8 @@ fbcheck_server_sbase <- function(input, output, session, values) {
       shinysky::showshinyalert(session, "alert_fbapp_warning_sbase", paste("ERROR: Your data file has only one row of data. Please upload the right one. "), styleclass = "danger")  
     } else {
       hot_bdata_sbase2 <- dt #fbapp2hidap(fieldbook = dt)
+      names(hot_bdata_sbase2) <- gsub("[[:space:]]", "", names(hot_bdata_sbase2)) #remove whitespaces
+      hot_bdata_sbase2
     }
   
     ####### Create Unique ID ######## 
@@ -85,14 +87,13 @@ fbcheck_server_sbase <- function(input, output, session, values) {
     fileNameExtFile<- fileNameExtFile()
     
     ####### Reactive values  #######
-    hot_bdata_sbase <- hot_bdata_sbase2 
-      values <-  shiny::reactiveValues(
+    hot_bdata_sbase <- hot_bdata_sbase2
+    
+    values <-  shiny::reactiveValues(
         hot_btable_fbapp_sbase = hot_bdata_sbase#()
       )
     DF <- NULL
 
-
-  
     if(!is.null(input$hot_btable_fbapp_sbase)) {
        DF = hot_to_r(input$hot_btable_fbapp_sbase)
        
@@ -110,8 +111,6 @@ fbcheck_server_sbase <- function(input, output, session, values) {
     } else if (!is.null(values[["hot_btable_fbapp_sbase"]])) {
       DF = values[["hot_btable_fbapp_sbase"]]
     } 
-    
- 
 
  
     if(!is.null(DF)){
@@ -127,6 +126,10 @@ fbcheck_server_sbase <- function(input, output, session, values) {
       
       crop <- hot_crop_sbase()
       trait_dict <- get_crop_ontology(crop = crop, dsource = dsource)
+      #print(trait_dict)
+      #print(DF)
+      #print(traits)
+      #print(dsource)
       traittools::col_render_trait(fieldbook = DF, trait = traits , trait_dict = trait_dict, dsource = dsource)
     }
   })
