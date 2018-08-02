@@ -73,6 +73,7 @@ fbcheck_server_sbase <- function(input, output, session, values) {
     }
  
     ####### Show Warnings to users   #######
+    #ToDo: Include plot_id
     if(!is.element("plot_name", names(dt))){ 
       shinysky::showshinyalert(session, "alert_fbapp_warning_sbase", paste("ERROR: The file imported does not has 'plot_name' header."), styleclass = "danger")  
     } else if(nrow(dt)==1){
@@ -175,6 +176,20 @@ fbcheck_server_sbase <- function(input, output, session, values) {
       incProgress(2/6, detail = paste("Formatting hidap file..."))
       fb<- DF #hidap2fbApp(fieldbook = DF)
       
+      exportFormat <- input$fbcheck_fbapp_ExportFormat_sbase
+      if(exportFormat=="Simple"){
+        names(fb)[1] <-  "observationunit_name"
+        #Remove unncesary columns for simple format
+        #ToDo: ask if user need 'plot_id' column in 'simple' format for sweetpotatobase
+        fb$accession_name <- fb$plot_id <- 	fb$plot_number <- fb$block_number <- 	fb$is_a_control	<- fb$rep_number	<- fb$row_number <- 	fb$col_number <- NULL
+        fb <- fb
+        
+      } else {
+        fb
+      }
+      
+      
+      
       incProgress(3/6, detail = paste("Downloading FieldBookApp-SPBase file..."))
       incProgress(4/6, detail = paste("Refreshing HIDAP..."))
       Sys.sleep(3)
@@ -251,6 +266,7 @@ fbcheck_server_sbase <- function(input, output, session, values) {
     xdate <- Sys.time()
     
     v_study <- input$file_fbapp_sbase$name
+    v_study <- gsub(".csv", "", v_study)
     
     uploadDate  <- as.character(xdate, "%Y%m%d%H%M%S")
     uploadDate_s <- as.character(xdate, "%Y-%m-%d %H:%M:%S")
