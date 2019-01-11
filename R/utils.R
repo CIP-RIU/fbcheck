@@ -111,14 +111,14 @@ out_form_table <- function(form){
   
   #Tranform data to tabular form
   ngen <- ncol(form) #number of evaluated genotyoes (cipnumber or variety) evaluated in organoleptic form
-  res <- gather(form, "INSTN", "Marks", 4:ngen)
+  res <- tidyr::gather(form, "INSTN", "Marks", 4:ngen)
   
   #---- Extraction of the following parameters:  (1) Name of evaluator
   # (1) Name of evaluator, # (2) Type_of_trial , # (3) Name_of_Evaluator and (4) Sex
-  org_params<- res[1:4,] %>% select(Variable, Attributes)
+  org_params<- res[1:4,] %>%  dplyr::select(Variable, Attributes)
   
   #Transform the long table in a spread table (line table) [variables as headers and parameters as values]
-  org_params <-  org_params %>% spread(Variable, Attributes) %>% as.list() #organoletpic params
+  org_params <-  org_params %>% tidyr::spread(Variable, Attributes) %>% as.list() #organoletpic params
   
   #Number of Panelist and Sex of the panelist
   PanelNo <- org_params$Number_of_panel
@@ -127,10 +127,10 @@ out_form_table <- function(form){
   #---- Extract x mark data (organoleptic votes for each variety)
   # Se agrego "NA" y NA para que filtre con esos valores. Hay algunos vectores que continene NA en forma de caracter o logico 
   # (sin comillas)
-  org_marks <- res %>% filter(Variable %in% c("APPEARANCE","TASTE","TEXTURE","NA",NA))
+  org_marks <- res %>% dplyr::filter(Variable %in% c("APPEARANCE","TASTE","TEXTURE","NA",NA))
   
   #the number of genotypes gives us the number of repetation per block
-  nrow_org_marks <- n_distinct(org_marks$INSTN)
+  nrow_org_marks <- dplyr::n_distinct(org_marks$INSTN)
   
   #Filling the NA character values with the name of the variables
   org_vars <- c("APPEARANCE","TASTE","TEXTURE") %>% #vector
@@ -138,10 +138,10 @@ out_form_table <- function(form){
     rep(., nrow_org_marks) #number of repetition for each block
   
   ##### BEGIN  TEST  Add test: number of "x" in organoleptic form number '#'
-  org_marks <- mutate(org_marks, Marks = tolower(Marks))
+  org_marks <- dplyr::mutate(org_marks, Marks = tolower(Marks))
   
   #number of real and hipotetical x marks counted in organoleptic forms.
-  real_n_xmarks <- org_marks %>% select(Marks) %>% str_count(pattern = "x") 
+  real_n_xmarks <- org_marks %>% dplyr::select(Marks) %>% stringr::str_count(pattern = "x") 
   hipo_n_xmarks <- nrow_org_marks*3 
   if(real_n_xmarks == hipo_n_xmarks) {
     message <- paste("continue")
@@ -154,12 +154,12 @@ out_form_table <- function(form){
   geno_names <- unique(org_marks$INSTN)
   
   #Replace the older variable name by org_vars values
-  org_marks <- mutate(org_marks, Variable = org_vars) %>%
-    filter(Marks %in% c('x',"X")) %>%
-    select(-Marks,-Attributes)  
+  org_marks <- dplyr::mutate(org_marks, Variable = org_vars) %>%
+                dplyr::filter(Marks %in% c('x',"X")) %>%
+                dplyr::select(-Marks,-Attributes)  
   
   #Data transformation for analysis
-  org_marks_table <- org_marks %>% spread(Variable, Grade) %>% mutate(PanelNo, Sex)
+  org_marks_table <- org_marks %>% tidyr::spread(Variable, Grade) %>% dplyr::mutate(PanelNo, Sex)
   
   
   #If one genotypes have missing data, this code automatically auto-complete the orgaleptic tidy form
@@ -332,7 +332,7 @@ hidap2fbApp <- function(fieldbook) {
      fbdb <- fieldbook 
     # fbdb1 <- fbdb %>% tidyr::unite(plot_name, abbr_user, plot_number, rep, accesion_name, sep = "_")
     # trait_names <- names(fbdb1)[grepl("CO", x = names(fbdb1))]
-    # fbdb2 <- fbdb1 %>% gather_("trait", "value", names(fbdb1)[grepl("CO", x = names(fbdb1))])
+    # fbdb2 <- fbdb1 %>% tidyr::gather_("trait", "value", names(fbdb1)[grepl("CO", x = names(fbdb1))])
     # fbdb2$trait <-  str_replace_all(fbdb2$trait, pattern = "-", "|" )
     # fbdb2
      fbdb1 <- fbdb %>% tidyr::unite(super_plot_name, abbr_user, plot_number, rep, accesion_name , timestamp, person ,location ,number, sep = "--")
@@ -359,3 +359,58 @@ rhandsontable_update<- function(fieldbook){
   temp <-fb
   out <- temp 
 }
+
+
+#' Convert FieldbookApp data to json structures
+#' 
+#' @param dfr data.frame 
+#' @description FieldbookApp files (csv) should be transformed into json files in order to upload into Sol genomics databases.
+#' @author Omar Benites
+#' @export
+# @param database character Choose a database at which you are extracting data.
+
+fbapp2json <- function(dfr){
+  
+  headers<- c("plot_name", "plot_id", "block_number", "plot_number", "rep_number" , "row_number", "col_number",
+              "accession_name",  "is_a_control", "synosyms", "trial_name", "location_name", "year", "pedigree",
+              "tier", "seedlot_name", "seed_transaction_operator", "num_seed_per_plot", "range_number", "plot_geo_json",
+              "timestamp",	"person"	,"location",	"number")
+  
+  #fieldbook headers
+  fb_headers <- names(dfr)
+  
+  #Crop Ontology (CO) headers
+  co_h_lg <- grepl(pattern = "CO", fb_headers) #logical exp. to detect co_headers
+  co_cols <- dfr[co_h_lg] #detect Crop ontology columns 
+  
+  #Experiment columns: -get rid trait variables and retain experimental variables (plot, rep, year, etc)
+  exp_cols <- dfr[!co_h_lg]
+  
+  #continue ensemble the exp_cols and co_cols : fieldbook
+  fb_h<- c("plot_id", names(co_cols)) #fb_headers
+  fb<- cbind(exp_cols, co_cols)
+  fb<- fb[fb_h]
+  fb <- as.data.frame(fb, stringsAsFactors =FALSE)
+  names(fb) <- gsub(pattern = ".*\\|",replacement = "", x = names(fb) )
+  
+  #tranpose data
+  tfb<- fb %>% tidyr::gather(observationVariableDbId, value, 2:ncol(fb))
+  tfb[,"value"]<- as.character(tfb[, "value"]) #Brapi format
+  
+  #Bryan says: remove Values equal to NA. Only upload complete cases.
+  tfb <- tfb %>% dplyr::filter(complete.cases(.))
+  
+  #rename first column for: "observationUnitDbID" (brapi standard)
+  names(tfb)[1] <- "observationUnitDbID"
+  tfb[,"observationUnitDbID"]<- as.character(tfb[, "observationUnitDbID"]) #Brapi format
+  
+  #Include access_token and Observations in the json format
+  tfb2list <- list(access_token= "RbgKDBRxmkdopsa2f40", Observations = tfb)#pass data.frame as element of the list
+  #tfb2list <- list(observations = tfb)#pass data.frame as element of the list
+  
+  #list To Json
+  list2json <- jsonlite::toJSON(tfb2list)
+  
+}
+
+

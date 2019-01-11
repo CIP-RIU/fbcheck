@@ -31,6 +31,8 @@ fbcheck_ui <- function (type = "tab", title = "Data Quality and Processing",
                              
                                               shiny::fileInput(inputId = "file_fbapp_sbase", label = "Choose CSV File", multiple = FALSE,
                                                                accept = c("text/csv","text/comma-separated-values,text/plain", ".csv")),
+                                              selectInput(inputId = "fbcheck_fbapp_ExportFormat",label = "Spreadsheet format download",choices = c("Simple","Standard"), selected = "Standard"), 
+                                              
                                               #actionButton('reset', 'Reset Input'),
                                               
                                               HTML('<div style="float: right; margin: 0 6px 6px 11px;">'),
@@ -44,8 +46,7 @@ fbcheck_ui <- function (type = "tab", title = "Data Quality and Processing",
                                                         br(), 
                               tabBox(
                                          width = 12,
-                                          tabPanel(
-                                                             "Standard Modules",
+                                          tabPanel("Standard Modules",
                                                              
                                                              # try(shinyFiles::shinyFilesButton("file","File select", "Please select a file", FALSE)), 
                                                              # shiny::actionButton("calculate","Calculate", icon("play-circle-o")), 
