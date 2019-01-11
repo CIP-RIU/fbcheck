@@ -1,6 +1,6 @@
 Package: fbcheck
 Title: Web Interface for Data Quality and Processing
-Version: 2.0.4
+Version: 2.0.5
 Authors@R: c(
         person("Omar","Benites",,"obacc07@gmail.com",c("aut","cre"))
         )
@@ -23,7 +23,10 @@ Imports:
     date,
     purrr,
     tidyr,
-    dplyr
+    dplyr,
+    httr,
+    RMySQL,
+    DT
 License: MIT + file LICENSE
 LazyData: true
 RoxygenNote: 6.0.1

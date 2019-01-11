@@ -44,16 +44,35 @@ fbcheck_ui_sbase <- function(type="tab", title="Data Quality and Processing", na
                             #   
                             # ),
                             
+                            
                             #conditionalPanel(
                             #  condition = "input.fbdesign_dsource_sbase == 'FieldBookApp-SPBase'",
+                            column(6, 
+                                   shiny::fileInput(inputId = "file_fbapp_sbase", label = "Choose CSV File", multiple = FALSE,
+                                                    accept = c("text/csv","text/comma-separated-values,text/plain", ".csv")),
+                                   
+                                   selectInput(inputId = "fbcheck_fbapp_ExportFormat_sbase",label = "Spreadsheet format download",choices = c("Simple","Standard"), selected = 2)
+                                   
+                                   
+                                   ),
+                            column(6, 
+                                   # HTML('<div style="float: right; margin: 0 5px 5px 10px;">'),
+                                   HTML('<div style="float: right;">'),
+                                   br(),
+                                   shiny::downloadButton('downloadData', 'Download', class = "btn-primary",style="color: #fff;"),
+                                   
+                                   ################## HIDAP REGISTRY #########################################
+                                   #actionButton('saveData', 'Save', icon=icon("save"), width = 100),
+                                   ######################################### ##################################
+                                   
+                                   HTML('</div>')
+                                   
+                                   ),
 
-                                shiny::fileInput(inputId = "file_fbapp_sbase", label = "Choose CSV File", multiple = FALSE,
-                                                 accept = c("text/csv","text/comma-separated-values,text/plain", ".csv")),
+                               
                                 #actionButton('reset', 'Reset Input'),
                                
-                                HTML('<div style="float: right; margin: 0 5px 5px 10px;">'),
-                                shiny::downloadLink('downloadData', 'Download'),
-                                HTML('</div>'),
+                               
                              # )
                             #),
                             
