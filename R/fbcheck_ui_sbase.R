@@ -12,7 +12,7 @@ fbcheck_ui_sbase <- function(type="tab", title="Data Quality and Processing", na
   shinydashboard::tabItem(tabName = name,
                           h2(title),   
                           shinyjs::useShinyjs(),
-                          #shinyjs::extendShinyjs(text = "shinyjs.downloadData = function() { location.reload(); }"),
+                          shinyjs::extendShinyjs(text = "shinyjs.downloadData = function() { location.reload(); }"),
                           
                           # shinyWidgets::awesomeRadio(inputId = "fbdesign_dsource_sbase", 
                           #                            label = "Select data source", choices = c("HIDAP", 
@@ -51,15 +51,18 @@ fbcheck_ui_sbase <- function(type="tab", title="Data Quality and Processing", na
                                    shiny::fileInput(inputId = "file_fbapp_sbase", label = "Choose CSV File", multiple = FALSE,
                                                     accept = c("text/csv","text/comma-separated-values,text/plain", ".csv")),
                                    
-                                   selectInput(inputId = "fbcheck_fbapp_ExportFormat_sbase",label = "Spreadsheet format download",choices = c("Simple","Standard"), selected = 2)
-                                   
-                                   
-                                   ),
+                                   selectInput(inputId = "fbcheck_fbapp_ExportFormat_sbase",label = "Spreadsheet format download",
+                                               choices = c("Simple","Standard"), selected = 2)
+                                  
+                                 ),
+                            
                             column(6, 
                                    # HTML('<div style="float: right; margin: 0 5px 5px 10px;">'),
                                    HTML('<div style="float: right;">'),
                                    br(),
-                                   shiny::downloadButton('downloadData', 'Download', class = "btn-primary",style="color: #fff;"),
+                                 
+                                   actionButton("uploadSbase", "Upload", icon = icon("upload")),
+                                   shiny::downloadButton('downloadData', 'Download', class = "btn-primary", style="color: #fff;"),
                                    
                                    ################## HIDAP REGISTRY #########################################
                                    #actionButton('saveData', 'Save', icon=icon("save"), width = 100),
@@ -110,6 +113,9 @@ fbcheck_ui_sbase <- function(type="tab", title="Data Quality and Processing", na
                                             
                                               box(rHandsontableOutput("hot_btable_fbapp_sbase",height = "100%",width = "100%"),
                                                   height = "3400px",width ="2400px")#,
+                                            
+                                            
+                                            
                                             #),
                                             
                                             #                                      ),

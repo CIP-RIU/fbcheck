@@ -16,33 +16,30 @@ check_fbapp <- function(dfr){
                   "tier", "seedlot_name", "seed_transaction_operator", "num_seed_per_plot", "range_number", "plot_geo_json",
                   "timestamp",	"person"	,"location",	"number")
   
-  if(nrow(dfr)){
-    message <- paste("The file is empty")
+  #fieldbook headers
+  fb_headers <- names(dfr)
+  #Crop Ontology (CO) headers
+  co_h_lg <- grepl(pattern = "CO", fb_headers) #logical exp. to detect co_headers
+  co_cols <- dfr[co_h_lg] #detect Crop ontology columns 
+  #Experiment columns: -get rid trait variables and retain experimental variables (plot, rep, year, etc)
+  exp_cols <- dfr[!co_h_lg]
+  #ToDo: create two functions for check ontology terms (exist) and exp sol_headers
+  check_headers <- names(exp_cols) %in% sol_headers  
+  
+  
+  if(nrow(dfr)==0){
+    msg <- paste("There are not changes in the dataset")
     status <- "error"
   } else if(!is.element("plot_id", fb_headers)){ #Check #1
-    message <- paste("The variable 'plot_id' is missing. Must be included in order to upload into the database")
+    msg <- paste("The variable 'plot_id' is missing. Must be included in order to upload into the database")
     status <- "error"
   } else if(sum(names(exp_cols) %in% sol_headers) != length(names(exp_cols))) {
-    
-    #fieldbook headers
-    fb_headers <- names(dfr)
-    
-    #Crop Ontology (CO) headers
-    co_h_lg <- grepl(pattern = "CO", fb_headers) #logical exp. to detect co_headers
-    co_cols <- dfr[co_h_lg] #detect Crop ontology columns 
-    
-    #Experiment columns: -get rid trait variables and retain experimental variables (plot, rep, year, etc)
-    exp_cols <- dfr[!co_h_lg]
-    
-    #ToDo: create two functions for check ontology terms (exist) and exp sol_headers
-    check_headers <- names(exp_cols) %in% sol_headers  
-    
     #Check #2
     non_found<- names(exp_cols)[!check_headers]
-    message <- paste("The variable(s)", non_found, "was (were) not found in the database. Refine your file before processing.")
+    msg <- paste("The variable(s)", non_found, "was (were) not found in the database. Refine your file before processing.")
     status <- "error"
   } else { #Check #3
-    msg <-  paste("Successfully checked!")
+    msg <-  paste("Dataset successfully uploaded in SweetPotatoBase!")
     status <- "success"
   }
   
@@ -50,3 +47,10 @@ check_fbapp <- function(dfr){
   
 }
 
+# 
+# 
+# check_upload <- function(){
+#   
+#   
+#   
+# }

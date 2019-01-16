@@ -7,10 +7,10 @@
 rhandsontable_update(fieldbook)
 }
 \arguments{
-\item{fieldbook}{field data trough rhandsontable}
+\item{fieldbook}{data.frame field data trough rhandsontable}
 }
 \description{
-get updates from rhandonstable after user modifications
+Get updates from rhandonstable after user modifications
 }
 \author{
 Omar Benites
