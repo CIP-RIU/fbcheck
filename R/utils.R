@@ -465,7 +465,7 @@ upload_studies<- function(dbname= "sweetpotatobase",
   #jsonview::json_tree_view(xout) #json tree view
   
   fbjson <- fbapp2json(dfr = dfr, token = con$token)
-  jsonview::json_tree_view(fbjson)
+  #jsonview::json_tree_view(fbjson)
   #-----  PUT to sweetpotatobase --------------------------------------------------------------
   url <- urlput #"sgn:eggplant@sweetpotatobase-test.sgn.cornell.edu/brapi/v1/observations"
   body<- fbjson #from fb2json

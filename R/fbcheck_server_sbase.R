@@ -125,17 +125,17 @@ fbcheck_server_sbase <- function(input, output, session, values) {
     DF <- NULL
 
 #   ####### Detect if hot_btable_fbapp_sbase has data  #######
-    if(!is.null(input$hot_btable_fbapp_sbase)) {
-        print("if 1")
-        DF = hot_to_r(input$hot_btable_fbapp_sbase)
-        #values[["hot_btable_fbapp_sbase"]] = DF
-        if(file.exists(fileNameExtFile)) {
-              former_datapath <- readRDS(file = fileNameExtFile)
-              if(hot_fbapp_path()!= former_datapath){
-                DF <- hot_bdata_sbase2
-              }
-           }
-    }
+    # if(!is.null(input$hot_btable_fbapp_sbase)) {
+    #     print("if 1")
+    #     DF = hot_to_r(input$hot_btable_fbapp_sbase)
+    #     #values[["hot_btable_fbapp_sbase"]] = DF
+    #     if(file.exists(fileNameExtFile)) {
+    #           former_datapath <- readRDS(file = fileNameExtFile)
+    #           if(hot_fbapp_path()!= former_datapath){
+    #             DF <- hot_bdata_sbase2
+    #           }
+    #        }
+    # }
     ############## end detefct if ######################################
     
     if(!is.null(input$hot_btable_fbapp_sbase)) {
@@ -217,7 +217,7 @@ fbcheck_server_sbase <- function(input, output, session, values) {
       fb<-  hot_to_r(input$hot_btable_fbapp_sbase)  
     }
      
-    res<- check_fbapp(dfr=fb)
+    res<- fbcheck::check_fbapp(dfr=fb)
     shiny::withProgress(message = "Uploading file...", value = 0,
       {
         incProgress(1/6, detail = paste("Checking data..."))
@@ -229,18 +229,18 @@ fbcheck_server_sbase <- function(input, output, session, values) {
       else {
         incProgress(2/6, detail = paste("Checking data..."))
         
-        user <- str_trim(input$fbchecksbaseUser,side = "both")
-        password <- str_trim(input$fbchecksbasePass,side = "both")
-        out<- upload_studies(dbname= "sweetpotatobase", 
-                           urltoken = "sgn:eggplant@sweetpotatobase-test.sgn.cornell.edu/brapi/v1/token",
-                           urlput=  "sgn:eggplant@sweetpotatobase-test.sgn.cornell.edu/brapi/v1/observations",
-                           user= user, password=password,  dfr=fb)
+        user <- stringr::str_trim(input$fbchecksbaseUser,side = "both")
+        password <- stringr::str_trim(input$fbchecksbasePass,side = "both")
+        out<- fbcheck::upload_studies(dbname= "sweetpotatobase", 
+                                       urltoken = "sgn:eggplant@sweetpotatobase-test.sgn.cornell.edu/brapi/v1/token",
+                                       urlput=  "sgn:eggplant@sweetpotatobase-test.sgn.cornell.edu/brapi/v1/observations",
+                                       user= user, password=password,  dfr=fb)
       
           if(out$metadata$status[[6]]$code=="200"){
             shinysky::showshinyalert(session, "alert_fbappsbase_upload", paste(res$msg), styleclass = "success")  
             
             incProgress(5/6, detail = paste("Finishing upload to SweetPotatoBase..."))
-            incProgress(6/6, detail = paste("Refreshing page..."))
+            incProgress(6/6, detail = paste("Refreshing page... ")) 
             
             session$reload()
             

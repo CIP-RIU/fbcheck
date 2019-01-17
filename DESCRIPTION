@@ -8,7 +8,6 @@ Maintainer: Omar Benites <obacc07@gmail.com>
 Description: fbcheck is a package which containt a user interface for data quality and processing.
 Depends:
     R (>= 3.2.1),
-    traittools
 Imports:
     stringr,
     magrittr,
@@ -19,6 +18,7 @@ Imports:
     doBy,
     shiny,
     sbformula,
+    traittools,
     data.table,
     date,
     purrr,
@@ -27,7 +27,8 @@ Imports:
     httr,
     RMySQL,
     DT
+Remotes: CIP-RIU/traittools
 License: MIT + file LICENSE
 LazyData: true
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.0
 Suggests: testthat
