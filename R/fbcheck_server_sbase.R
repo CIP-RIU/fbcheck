@@ -9,7 +9,7 @@
 #' @export
 
 fbcheck_server_sbase <- function(input, output, session, values) {
- 
+  
   ################################ R. ARIAS###############################################
   # db <- reactiveValues()
   # db$constUserDB <- "hidap_sbase"
@@ -21,7 +21,7 @@ fbcheck_server_sbase <- function(input, output, session, values) {
   #Catch the file path for reading fieldbook sheets
   volumes <- shinyFiles::getVolumes()
   
-  #----Return the type of crop in Minimal sheet
+  #----Return the type of crop in Minimal sheet -------------
   hot_crop_sbase <- reactive({
     
     #formatFile <- hot_formatFile_sbase()
@@ -42,15 +42,15 @@ fbcheck_server_sbase <- function(input, output, session, values) {
     
   })
   
-  #----FieldbookApp Path  ---------------------
+  #----FieldbookApp Path  -----------------------------------
   hot_fbapp_path <- reactive({
-   
+    
     file_fbapp <- input$file_fbapp_sbase
     out<- file_fbapp$datapath 
     
   })
   
-  #---- Format of the file ---------------------
+  #---- Format of the file -----------------------------------
   fileNameExtFile <- reactive({
     
     servName <- "fbappdatapath.rds"
@@ -62,35 +62,28 @@ fbcheck_server_sbase <- function(input, output, session, values) {
     
   })
   
-  fb_sbase <-reactive({
-      ####### Import CSV data #######
-      file_fbapp <- input$file_fbapp_sbase
-      #print(file_fbapp)
-      if (is.null(file_fbapp)) {
-        #shinyjs::disable("saveData")  # Codigo R.ARIAS  SAVE
-        return(NULL)
-      } else {  
-        dt <- readr::read_csv(file_fbapp$datapath)  # Codigo R.ARIAS SAVE
-        #shinyjs::enable("saveData")
-      }
-    
-  })
+  # Load dataset ---------------------------------------------
+  fb_sbase <- function(){
+    ####### Import CSV data #######
+    #file_fbapp <- input$file_fbapp_sbase
+    if (is.null(input$file_fbapp_sbase)) {
+      #shinyjs::disable("saveData")  # Codigo R.ARIAS  SAVE
+      return(NULL)
+    } else {
+      dt <- readr::read_csv(input$file_fbapp_sbase$datapath)  # Codigo R.ARIAS SAVE
+      #shinyjs::enable("saveData")
+    }
+  
+  }
   
   #hot_btable represents fieldbook data ----------------------
   output$hot_btable_fbapp_sbase <-  renderRHandsontable({
+    
     req(input$file_fbapp_sbase)
-    ####### Import CSV data #######
-    # file_fbapp <- input$file_fbapp_sbase
-    # #print(file_fbapp)
-    # if (is.null(file_fbapp)) {
-    #   #shinyjs::disable("saveData")  # Codigo R.ARIAS  SAVE
-    #   return(NULL)
-    # } else {  
-    #   dt <- readr::read_csv(file_fbapp$datapath)  # Codigo R.ARIAS SAVE
-    #   #shinyjs::enable("saveData")
-    # }
- 
+   
     dt<- fb_sbase()
+    flag <<- FALSE
+    
     
     ####### Show Warnings to users   #######
     #ToDo: Include plot_id
@@ -105,7 +98,7 @@ fbcheck_server_sbase <- function(input, output, session, values) {
       names(hot_bdata_sbase2) <- gsub("[[:space:]]", "", names(hot_bdata_sbase2)) #remove whitespaces
       hot_bdata_sbase2
     }
-  
+    
     ####### Create Unique ID ######## 
     servName <- "fbappdatapath.rds"
     uploadDate  <- as.character(Sys.time(), "%Y%m%d%H%M%S")
@@ -113,66 +106,55 @@ fbcheck_server_sbase <- function(input, output, session, values) {
     servName <- paste(uploadDate, ranStr, servName , sep= "-") #nombre sin extensions!!!!
     dirNameExtFile <- fbglobal::get_base_dir() #get directory of the file with fileName
     fileNameExtFile <-  paste0(dirNameExtFile, servName)
-   
+    
     fileNameExtFile<- fileNameExtFile()
     
     ####### Reactive values  #######
     hot_bdata_sbase <- hot_bdata_sbase2
     
     values <-  shiny::reactiveValues(
-        hot_btable_fbapp_sbase = hot_bdata_sbase#()
+      hot_btable_fbapp_sbase = hot_bdata_sbase#()
     )
     DF <- NULL
 
-#   ####### Detect if hot_btable_fbapp_sbase has data  #######
-    # if(!is.null(input$hot_btable_fbapp_sbase)) {
-    #     print("if 1")
-    #     DF = hot_to_r(input$hot_btable_fbapp_sbase)
-    #     #values[["hot_btable_fbapp_sbase"]] = DF
-    #     if(file.exists(fileNameExtFile)) {
-    #           former_datapath <- readRDS(file = fileNameExtFile)
-    #           if(hot_fbapp_path()!= former_datapath){
-    #             DF <- hot_bdata_sbase2
-    #           }
-    #        }
-    # }
-    ############## end detefct if ######################################
-    
     if(!is.null(input$hot_btable_fbapp_sbase)) {
-       DF = hot_to_r(input$hot_btable_fbapp_sbase)
-       
-      
-          if(file.exists(fileNameExtFile)) {    
-            former_datapath <- readRDS(file = fileNameExtFile)
-            if(hot_fbapp_path()!= former_datapath){
-            #if(!identical(hot_bdata_sbase2, DF)){
-            #if(flag1) {
-             DF <- hot_bdata_sbase2
-            } 
-          }
-
+      DF = hot_to_r(input$hot_btable_fbapp_sbase)
+      print("if 2")
+      if(file.exists(fileNameExtFile)) {
+        former_datapath <- readRDS(file = fileNameExtFile)
+        if(hot_fbapp_path()!= former_datapath){
+          #if(!identical(hot_bdata_sbase2, DF)){
+          flag <<- TRUE
+          print("entro")
+          DF <- hot_bdata_sbase2
+        }
+      }
       ###  end important note
       values[["hot_btable_fbapp_sbase"]] = DF
     } 
     else if (!is.null(values[["hot_btable_fbapp_sbase"]])) {
+      print("if 2.1")
       DF = values[["hot_btable_fbapp_sbase"]]
     } 
-
-    if(!is.null(DF)){
- 
+    
+    #if(!is.null(DF)){
+      
+      print("if 3")
+    
+      
       dsource <- 2
       traits <- traittools::get_trait_fb(DF, dsource = dsource)
-
+      
       file_fbapp <- input$file_fbapp_sbase
       value_datapath <- file_fbapp$datapath 
       fileNameExtFile <- paste0(dirNameExtFile, servName) #file.path(fbglobal::get_base_dir(), "fbappdatapath.rds")
-
+      
       saveRDS(value_datapath, file =  fileNameExtFile())
       
       crop <- hot_crop_sbase()
       trait_dict <- get_crop_ontology(crop = crop, dsource = dsource)
       traittools::col_render_trait(fieldbook = DF, trait = traits , trait_dict = trait_dict, dsource = dsource)
-    }
+    #}
   })
   
   #-----Upload to SweetPotatoBase------------------------------
@@ -184,74 +166,101 @@ fbcheck_server_sbase <- function(input, output, session, values) {
         column(
           12, br(),
           #column(6, align = "left", fluidRow(
-                    textInput(inputId="fbchecksbaseUser", label="",value="", 
-                              placeholder = "SweetPotatoBase User", width = NULL),#)
+          textInput(inputId="fbchecksbaseUser", label="",value="", 
+                    placeholder = "SweetPotatoBase User", width = NULL),#)
           #       ),
-         # column(6, align = "right", fluidRow( 
-                    passwordInput(inputId="fbchecksbasePass", label="", value = "", width = NULL,
-                                   placeholder = "SweetPotatoBase Password"),
-         
-                    column(6, align = "left", fluidRow(actionButton("submitsbase", "Submit"),
-                                                       shinysky::shinyalert("alert_fbappsbase_upload", FALSE, auto.close.after = 4))
-                                                       )
-                    #shinysky::shinyalert("alert_fbappsbase_upload", FALSE, auto.close.after = 4)
-         #        )
-          )
+          # column(6, align = "right", fluidRow( 
+          passwordInput(inputId="fbchecksbasePass", label="", value = "", width = NULL,
+                        placeholder = "SweetPotatoBase Password"),
+          
+          shinysky::shinyalert("alert_fbappsbase_upload", FALSE, auto.close.after = 4)
+          
+          # column(6, align = "left", fluidRow(actionButton("submitsbase", "Submit"),
+          #                                    shinysky::shinyalert("alert_fbappsbase_upload", FALSE, auto.close.after = 4))
+          #)
+          #shinysky::shinyalert("alert_fbappsbase_upload", FALSE, auto.close.after = 4)
+          #        )
+        )
       ),
-      easyClose = TRUE,
-      footer = NULL
+      easyClose = FALSE,
+      footer = tagList(
+        actionButton("submitsbase", "Submit"),
+        modalButton("Cancel")
+      )
     ))
   })
- 
+  
   
   #-----Submit data to SweetPotatoBase ---------
   observeEvent(input$submitsbase, {
     
-    #fb<- readr::read_csv(file = "/home/obenites/HIDAP_SB_1.0.0/utils/plot_id_tableFormatFbApp_2018FUMASUA.csv")
+    ### User and Password ##############################################################################
+    user<- stringr::str_trim(input$fbchecksbaseUser)
+    password <- stringr::str_trim(input$fbchecksbasePass)
     
+    ### Load Data ######################################################################################
     if(is.null(input$hot_btable_fbapp_sbase)){
       fb <- data.frame() #there are not changes
     }else {
-      #path <-  file.path(path,"hot_fieldbook_sbase.rds")
-      #fb <- readRDS(path)
-      fb<-  hot_to_r(input$hot_btable_fbapp_sbase)  
+      fb<-  hot_to_r(input$hot_btable_fbapp_sbase)
+      fb<- dplyr::tbl_df(fb)
     }
-     
-    res<- fbcheck::check_fbapp(dfr=fb)
-    shiny::withProgress(message = "Uploading file...", value = 0,
-      {
-        incProgress(1/6, detail = paste("Checking data..."))
     
-      if(res$status=="error"){
-        shinysky::showshinyalert(session, "alert_fbappsbase_upload", paste(res$msg), styleclass = "danger")
-        incProgress(6/6, detail = paste(""))
-      } 
-      else {
-        incProgress(2/6, detail = paste("Checking data..."))
-        
-        user <- stringr::str_trim(input$fbchecksbaseUser,side = "both")
-        password <- stringr::str_trim(input$fbchecksbasePass,side = "both")
-        out<- fbcheck::upload_studies(dbname= "sweetpotatobase", 
-                                       urltoken = "sgn:eggplant@sweetpotatobase-test.sgn.cornell.edu/brapi/v1/token",
-                                       urlput=  "sgn:eggplant@sweetpotatobase-test.sgn.cornell.edu/brapi/v1/observations",
-                                       user= user, password=password,  dfr=fb)
-      
-          if(out$metadata$status[[6]]$code=="200"){
-            shinysky::showshinyalert(session, "alert_fbappsbase_upload", paste(res$msg), styleclass = "success")  
-            
-            incProgress(5/6, detail = paste("Finishing upload to SweetPotatoBase..."))
-            incProgress(6/6, detail = paste("Refreshing page... ")) 
-            
-            session$reload()
-            
-          } else {
-            shinysky::showshinyalert(session, "alert_fbappsbase_upload", paste("Error trying to upload the fieldbook file. Please check it."), styleclass = "danger")  
-            incProgress(6/6, detail = paste(""))
-          }
-      }
-       
-    })
-   
+    ### Checking data ##################################################################################
+    
+    if(isTRUE(flag)){
+      fb <- fb_sbase() 
+    }
+    print(head(fb,4))
+    res<- fbcheck::check_fbapp(dfr=fb)
+    
+    shiny::withProgress(message = "Uploading file...", value = 0,
+                        {
+                          incProgress(1/6, detail = paste("Checking data..."))
+                         
+                          if(res$status=="error"){
+                            shinysky::showshinyalert(session, "alert_fbappsbase_upload", paste(res$msg), styleclass = "danger")
+                            incProgress(6/6, detail = paste("Errors detected"))
+                          } 
+                          else {
+                            incProgress(2/6, detail = paste("Checking data..."))
+                        
+                            print(head(fb,n = 4))
+                            print(user)
+                            print(password)
+                            
+                           res2<- fbcheck::check_credentials(dbname= "sweetpotatobase", user=user, password=password,
+                                                             urltoken= "sgn:eggplant@sweetpotatobase-test.sgn.cornell.edu/brapi/v1/token")
+                              
+                           if(res2$status=="error"){
+                                shinysky::showshinyalert(session, "alert_fbappsbase_upload", paste(res2$msg), styleclass = "danger")
+                                incProgress(6/6, detail = paste("Errors detected"))
+                           } else {
+                                out <- fbcheck::upload_studies(dbname= "sweetpotatobase",
+                                                     urltoken = "sgn:eggplant@sweetpotatobase-test.sgn.cornell.edu/brapi/v1/token",
+                                                     urlput=  "sgn:eggplant@sweetpotatobase-test.sgn.cornell.edu/brapi/v1/observations",
+                                                     user= user, password=password, dfr=fb)
+                                print("4")
+                                if(out$metadata$status[[6]]$code=="200"){
+                                  shinysky::showshinyalert(session, "alert_fbappsbase_upload", paste(res$msg), styleclass = "success")  
+                                  print("5") 
+                                  incProgress(5/6, detail = paste("Finishing upload to SweetPotatoBase..."))
+                                  incProgress(6/6, detail = paste("Refreshing page..."))
+                                  
+                                  session$reload()
+                                  
+                            } 
+                                else {
+                                  shinysky::showshinyalert(session, "alert_fbappsbase_upload", paste("Error trying to upload the fieldbook file. Please check it."), styleclass = "danger")  
+                                  incProgress(6/6, detail = paste(""))
+                            }
+                           
+                           } #end else (ok case)
+                           
+                          } #else else (all cases)
+                          
+                        })
+    
   })
   
   
@@ -261,46 +270,42 @@ fbcheck_server_sbase <- function(input, output, session, values) {
       paste('data-', Sys.Date(), '.csv', sep='')
     },
     content = function(con) {
-      path <- fbglobal::get_base_dir()
-      
-      ##
-      #print(fb_sbase())
-      ##
-      
-      shiny::withProgress(message = 'Downloading file', value = 0, {
-      incProgress(1/6, detail = paste("Reading table data..."))
+     
+     shiny::withProgress(message = 'Downloading file', value = 0, {
+        incProgress(1/6, detail = paste("Reading table data..."))
         
-      path <-  file.path(path,"hot_fieldbook_sbase.rds")
-      
-      DF <- hot_to_r(input$hot_btable_fbapp_sbase) # Important note: run server
-      
-      incProgress(2/6, detail = paste("Formatting hidap file..."))
-      fb<- DF #hidap2fbApp(fieldbook = DF)
-      
+        #DF <- hot_to_r(input$hot_btable_fbapp_sbase) # Important note: run server
+        incProgress(2/6, detail = paste("Formatting hidap file..."))
+        
+        if(is.null(input$hot_btable_fbapp_sbase)){
+          fb <- fb_sbase()
+        } else {
+          fb <- hot_to_r(input$hot_btable_fbapp_sbase) # Important note: run server
+        }
+          
       exportFormat <- input$fbcheck_fbapp_ExportFormat_sbase
-      if(exportFormat=="Simple"){
-        names(fb)[1] <-  "observationunit_name"
-        #Remove unncesary columns for simple format
-        #ToDo: ask if user need 'plot_id' column in 'simple' format for sweetpotatobase
-        fb$accession_name <- fb$plot_id <- 	fb$plot_number <- fb$block_number <- 	fb$is_a_control	<- fb$rep_number	<- fb$row_number <- 	fb$col_number <- NULL
-        fb <- fb
+        if(exportFormat=="Simple"){
+          names(fb)[1] <-  "observationunit_name"
+          #Remove unncesary columns for simple format
+          #ToDo: ask if user need 'plot_id' column in 'simple' format for sweetpotatobase
+          fb$accession_name <- fb$plot_id <- 	fb$plot_number <- fb$block_number <- 	fb$is_a_control	<- fb$rep_number	<- fb$row_number <- 	fb$col_number <- NULL
+          fb <- fb
+          
+        } 
+        else {
+          fb
+        }
         
-      } else {
-        fb
-      }
-      
-      
-      
-      incProgress(3/6, detail = paste("Downloading FieldBookApp-SPBase file..."))
-      incProgress(4/6, detail = paste("Refreshing HIDAP..."))
-      Sys.sleep(3)
-      incProgress(5/6, detail = paste("Refreshing HIDAP..."))
-    
-      write.csv(fb, con,row.names = FALSE)
-      
-      incProgress(6/6, detail = paste("Refreshing HIDAP..."))
-      Sys.sleep(5)
-      #shinyjs::js$downloadData()
+        incProgress(3/6, detail = paste("Downloading FieldBookApp-SPBase file..."))
+        incProgress(4/6, detail = paste("Refreshing HIDAP..."))
+        Sys.sleep(3)
+        incProgress(5/6, detail = paste("Refreshing HIDAP..."))
+        
+        write.csv(fb, con, row.names = FALSE)
+        
+        incProgress(6/6, detail = paste("Refreshing HIDAP..."))
+        Sys.sleep(5)
+        #shinyjs::js$downloadData()
       })
     }
   )
@@ -440,5 +445,4 @@ fbcheck_server_sbase <- function(input, output, session, values) {
   ################################## R .ARIAS ################
   
 }
-
 

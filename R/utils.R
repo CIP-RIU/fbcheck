@@ -436,12 +436,12 @@ upload_studies<- function(dbname= "sweetpotatobase",
                           user= "obenites", password=";c8U:G&z:X",dfr){
   
   
-  dt2<- readr::read_csv(file = "/home/obenites/HIDAP_SB_1.0.0/utils/plot_id_tableFormatFbApp_2018FUMASUA.csv")
-  dbname= "sweetpotatobase"; 
-  urltoken = "sgn:eggplant@sweetpotatobase-test.sgn.cornell.edu/brapi/v1/token";
-  urlput =   "sgn:eggplant@sweetpotatobase-test.sgn.cornell.edu/brapi/v1/observations";
-  user= "obenites"; 
-  password=";c8U:G&z:X";dfr=dt2
+  # dt2<- readr::read_csv(file = "/home/obenites/HIDAP_SB_1.0.0/utils/plot_id_tableFormatFbApp_2018FUMASUA.csv")
+  # dbname= "sweetpotatobase"; 
+  # urltoken = "sgn:eggplant@sweetpotatobase-test.sgn.cornell.edu/brapi/v1/token";
+  # urlput =   "sgn:eggplant@sweetpotatobase-test.sgn.cornell.edu/brapi/v1/observations";
+  # user= "obenites"; 
+  # password=";c8U:G&z:X";dfr=dt2
   
   
   #TODO
@@ -463,8 +463,7 @@ upload_studies<- function(dbname= "sweetpotatobase",
   con$token <- token
   con$expires_in <- httr::content(x = resp)$expires_in
   #jsonview::json_tree_view(xout) #json tree view
-  
-  fbjson <- fbapp2json(dfr = dfr, token = con$token)
+  fbjson <- fbcheck::fbapp2json(dfr = dfr, token = con$token)
   #jsonview::json_tree_view(fbjson)
   #-----  PUT to sweetpotatobase --------------------------------------------------------------
   url <- urlput #"sgn:eggplant@sweetpotatobase-test.sgn.cornell.edu/brapi/v1/observations"
@@ -472,13 +471,10 @@ upload_studies<- function(dbname= "sweetpotatobase",
   h <- c(con$token)
   tokenName <-  'X-Auth-Token'
   names(h) <- tokenName
-  res <- httr::PUT(url = url, body = body, encode = "json", timeout(25),
+  res <- httr::PUT(url = url, body = body, encode = "json", timeout(450000), #timeout:3 minutes, in case of having big data frames
                    httr::add_headers(`X-AUTH-TOKEN` = con$token))
   #xout <- httr::content(x = res)
-  txt <- ifelse(res$status == 200, " ok!", " problem!")
+  #txt <- ifelse(res$status == 200, " ok!", " problem!")
   out <- httr::content(res)
   #jsonview::json_tree_view(out)
 } 
-
-
-
