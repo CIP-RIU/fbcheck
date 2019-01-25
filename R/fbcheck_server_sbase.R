@@ -153,7 +153,8 @@ fbcheck_server_sbase <- function(input, output, session, values) {
       
       crop <- hot_crop_sbase()
       trait_dict <- get_crop_ontology(crop = crop, dsource = dsource)
-      traittools::col_render_trait(fieldbook = DF, trait = traits , trait_dict = trait_dict, dsource = dsource)
+      traittools::col_render_trait(fieldbook = DF, trait = traits , trait_dict = trait_dict, dsource = dsource) 
+      
     #}
   })
   
@@ -206,12 +207,15 @@ fbcheck_server_sbase <- function(input, output, session, values) {
       fb<- dplyr::tbl_df(fb)
     }
     
-    ### Checking data ##################################################################################
-    
     if(isTRUE(flag)){
+    # when users change datasets files (input$fileInput), but they do not modify the file  
       fb <- fb_sbase() 
     }
-    print(head(fb,4))
+    
+    ### Checking data ##################################################################################
+    
+   
+    #print(head(fb,4))
     res<- fbcheck::check_fbapp(dfr=fb)
     
     shiny::withProgress(message = "Uploading file...", value = 0,
