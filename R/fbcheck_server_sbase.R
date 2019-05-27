@@ -235,7 +235,7 @@ fbcheck_server_sbase <- function(input, output, session, values) {
                             
                            res2<- fbcheck::check_credentials(dbname= "sweetpotatobase", user=user, password=password,
                                                              #urltoken= "sgn:eggplant@sweetpotatobase-test.sgn.cornell.edu/brapi/v1/token")
-                                                             urltoken= "sweetpotatobase.org/brapi/v1/token")
+                                                             urltoken= "sweetpotatobase.org/brapi/v1/token") 
                               
                            if(res2$status=="error"){
                                 shinysky::showshinyalert(session, "alert_fbappsbase_upload", paste(res2$msg), styleclass = "danger")
