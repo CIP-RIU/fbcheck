@@ -52,7 +52,7 @@ fbcheck_ui_sbase <- function(type="tab", title="Data Quality and Processing", na
                                                     accept = c("text/csv","text/comma-separated-values,text/plain", ".csv")),
                                    
                                    selectInput(inputId = "fbcheck_fbapp_ExportFormat_sbase",label = "Spreadsheet format download",
-                                               choices = c("Simple","Standard"), selected = 2)
+                                               choices = c("Standard", "SPBase Format"), selected = 2)
                                   
                                  ),
                             
@@ -82,62 +82,69 @@ fbcheck_ui_sbase <- function(type="tab", title="Data Quality and Processing", na
                             
                             
                             #tabsetPanel(
-                            tabBox(width = 12,
-                                   tabPanel("Standard Modules", #begin tabset "CHECK"
-                                            
-                                            # conditionalPanel(
-                                            #   condition = "input.fbdesign_dsource_sbase == 'HIDAP'",
-                                            #   
-                                              #uiOutput("fbcheck_genofilter_sbase"),
-                                              #uiOutput("fbcheck_factorfilter_sbase"),
-                                              
-                                            #),
-                                            
-                                            #                                      fluidRow(
-                                            #                                        shinyFiles::shinyFilesButton('file', 'File select', 'Please select a file',FALSE),
-                                            #                                        shiny::actionButton("calculate", "Calculate",icon("play-circle-o")),
-                                            #                                        HTML('<div style="float: right; margin: 0 5px 5px 10px;">'),
-                                            #                                        shiny::actionLink('exportButton', 'Download data'),
-                                            #                                        HTML('</div>'),
-                                            shinysky::shinyalert("alert_fbapp_warning_sbase", FALSE, auto.close.after = 4),
-                                            
-                                            # conditionalPanel(
-                                            #   condition = "input.fbdesign_dsource_sbase == 'HIDAP'",
-                                            #   
-                                            #   box(rHandsontableOutput("hot_btable_sbase",height = "1400px",width = "1000px"),
-                                            #       height = "3400px",width ="2400px")#,
-                                            # ),
-                                            
-                                            #conditionalPanel(
-                                            #  condition = "input.fbdesign_dsource_sbase == 'FieldBookApp-SPBase'",
-                                            
-                                              box(rHandsontableOutput("hot_btable_fbapp_sbase",height = "100%",width = "100%"),
-                                                  height = "3400px",width ="2400px")#,
-                                            
-                                            
-                                            
-                                            #),
-                                            
-                                            #                                      ),
-                                            
-                                            # tags$style(type='text/css', "#file_fbapp_sbase { width:150px; margin-top: 25px;}"),
-                                            # tags$style(HTML('#file_fbapp_sbase {background-color:#0099cc; color: #ffffff}'))#,  
-                                            #tags$style(type='text/css', "#calculate_sbase { width:150px; margin-top: 25px;}"),
-                                            #tags$style(HTML('#calculate_sbase {background-color:#21b073; color: #ffffff}'))
-                                            
-                                   )
-                                   
-                                   #,#end tab Panel "CHECK"
-                                   
-                                   
-                                   #### Hiden Special Modules during September Preview Release -----------------
-                                   
-                                   
-                                  
-                                   
-                                   #### Hiden Special Modules during September Preview Release -----------------
-                                   
-                                   
+                            # tabBox(width = 12,
+                            #        tabPanel("Data Quality", #begin tabset "CHECK"
+                            #                 
+                            #                 # conditionalPanel(
+                            #                 #   condition = "input.fbdesign_dsource_sbase == 'HIDAP'",
+                            #                 #   
+                            #                   #uiOutput("fbcheck_genofilter_sbase"),
+                            #                   #uiOutput("fbcheck_factorfilter_sbase"),
+                            #                   
+                            #                 #),
+                            #                 
+                            #                 #                                      fluidRow(
+                            #                 #                                        shinyFiles::shinyFilesButton('file', 'File select', 'Please select a file',FALSE),
+                            #                 #                                        shiny::actionButton("calculate", "Calculate",icon("play-circle-o")),
+                            #                 #                                        HTML('<div style="float: right; margin: 0 5px 5px 10px;">'),
+                            #                 #                                        shiny::actionLink('exportButton', 'Download data'),
+                            #                 #                                        HTML('</div>'),
+                            #                 shinysky::shinyalert("alert_fbapp_warning_sbase", FALSE, auto.close.after = 4),
+                            #                 
+                            #                 # conditionalPanel(
+                            #                 #   condition = "input.fbdesign_dsource_sbase == 'HIDAP'",
+                            #                 #   
+                            #                 #   box(rHandsontableOutput("hot_btable_sbase",height = "1400px",width = "1000px"),
+                            #                 #       height = "3400px",width ="2400px")#,
+                            #                 # ),
+                            #                 
+                            #                 #conditionalPanel(
+                            #                 #  condition = "input.fbdesign_dsource_sbase == 'FieldBookApp-SPBase'",
+                            #                 
+                            #                   box(rHandsontableOutput("hot_btable_fbapp_sbase",height = "600px",width = "100%"),
+                            #                       height = "600px",width ="2400px")#,
+                            #                 
+                            #                 
+                            #                 
+                            #                 #),
+                            #                 
+                            #                 #                                      ),
+                            #                 
+                            #                 # tags$style(type='text/css', "#file_fbapp_sbase { width:150px; margin-top: 25px;}"),
+                            #                 # tags$style(HTML('#file_fbapp_sbase {background-color:#0099cc; color: #ffffff}'))#,  
+                            #                 #tags$style(type='text/css', "#calculate_sbase { width:150px; margin-top: 25px;}"),
+                            #                 #tags$style(HTML('#calculate_sbase {background-color:#21b073; color: #ffffff}'))
+                            #                 
+                            #        )
+                            #        
+                            #        #,#end tab Panel "CHECK"
+                            #        
+                            #        
+                            #        #### Hiden Special Modules during September Preview Release -----------------
+                            #        
+                            #        
+                            #       
+                            #        
+                            #        #### Hiden Special Modules during September Preview Release -----------------
+                            #        
+                            #        
+                            # )
+                            fluidRow(
+                              column(
+                                12,
+                                shinysky::shinyalert("alert_fbapp_warning_sbase", FALSE, auto.close.after = 4),
+                                rHandsontableOutput("hot_btable_fbapp_sbase",height = "600px",width = "100%")
+                              )
                             )
                           ),
                           br(),
