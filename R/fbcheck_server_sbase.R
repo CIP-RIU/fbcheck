@@ -234,18 +234,18 @@ fbcheck_server_sbase <- function(input, output, session, values) {
                             print(password)
                             
                            res2<- fbcheck::check_credentials(dbname= "sweetpotatobase", user=user, password=password,
-                                                             #urltoken= "sgn:eggplant@sweetpotatobase-test.sgn.cornell.edu/brapi/v1/token")
-                                                             urltoken= "https://sweetpotatobase.org/brapi/v1/token") 
+                                                             urltoken= "sgn:eggplant@sweetpotatobase-test.sgn.cornell.edu/brapi/v1/token")
+                                                             #urltoken= "https://sweetpotatobase.org/brapi/v1/token") 
                               
                            if(res2$status=="error"){
                                 shinysky::showshinyalert(session, "alert_fbappsbase_upload", paste(res2$msg), styleclass = "danger")
                                 incProgress(6/6, detail = paste("Errors detected"))
                            } else {
                                 out <- fbcheck::upload_studies(dbname= "sweetpotatobase",
-                                                     # urltoken = "sgn:eggplant@sweetpotatobase-test.sgn.cornell.edu/brapi/v1/token",
-                                                     # urlput=  "sgn:eggplant@sweetpotatobase-test.sgn.cornell.edu/brapi/v1/observations",
-                                                     urltoken = "https://sweetpotatobase.org/brapi/v1/token",
-                                                     urlput=  "https://sweetpotatobase.org/brapi/v1/observations",
+                                                      urltoken = "sgn:eggplant@sweetpotatobase-test.sgn.cornell.edu/brapi/v1/token",
+                                                      urlput=  "sgn:eggplant@sweetpotatobase-test.sgn.cornell.edu/brapi/v1/observations",
+                                                     #urltoken = "https://sweetpotatobase.org/brapi/v1/token",
+                                                     #urlput=  "https://sweetpotatobase.org/brapi/v1/observations",
                                                      user= user, password=password, dfr=fb)
                                 print("4")
                                 if(out$metadata$status[[6]]$code=="200"){

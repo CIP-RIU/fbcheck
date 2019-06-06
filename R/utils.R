@@ -431,8 +431,10 @@ fbapp2json <- function(dfr, token="lfsermmo93;3r"){
 #' @export
 
 upload_studies<- function(dbname= "sweetpotatobase", 
-                          urltoken = "https://sweetpotatobase.org/brapi/v1/token",
-                          urlput =   "https://sweetpotatobase.org/brapi/v1/observations",
+                          #urltoken = "https://sweetpotatobase.org/brapi/v1/token",
+                          #urlput =   "https://sweetpotatobase.org/brapi/v1/observations",
+                          urltoken = "sgn:eggplant@sweetpotatobase-test.sgn.cornell.edu/brapi/v1/token",
+                          urlput = "sgn:eggplant@sweetpotatobase-test.sgn.cornell.edu/brapi/v1/observations",
                           user= "obenites", password=";c8U:G&z:X",dfr){
   
   

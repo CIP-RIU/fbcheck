@@ -1,32 +1,47 @@
-# 
+# # # 
 # library(tidyr)
 # library(dplyr)
 # library(stringr)
 # library(fbcheck)
-# context("Organoleptic forms test")
+# library(fbdesign)
+# # # context("Organoleptic forms test")
+# # # 
+# # # test_that("When F6 and F7 organolepticps NA logical", {
+# # # 
+# # # 
+#  dbname<- "sweetpotatobase"
+#  user <- "obenites"
+#  password <- ";c8U:G&z:X"
+#  fb <- readr::read_csv("tests/testthat/excel/18AMDPNaCRRI_final - Copy.csv")
+#  names(fb) <- gsub("[[:space:]]", "", names(fb))
+#  fb <- tbl_df(fb)
+# # #user <- "iperezm"
+# # #password <- "41954776"
 # 
-# test_that("When F6 and F7 organolepticps NA logical", {
+# # out <- fbcheck::upload_studies(dbname= "sweetpotatobase",
+# #                                # urltoken = "sgn:eggplant@sweetpotatobase-test.sgn.cornell.edu/brapi/v1/token",
+# #                                # urlput=  "sgn:eggplant@sweetpotatobase-test.sgn.cornell.edu/brapi/v1/observations",
+# #                                urltoken = "https://sweetpotatobase.org/brapi/v1/token",
+# #                                urlput=  "https://sweetpotatobase.org/brapi/v1/observations",
+# #                                user= user, password=password, dfr=fb)
 # 
 # 
-# dbname<- "sweetpotatobase"
- user <- "obenites"
- password <- ";c8U:G&z:X"
-# #user <- "iperezm"
-# #password <- "41954776"
 # 
-# urltoken <- "https://sweetpotatobase.org/brapi/v1/token"
-# urlput <- "https://sweetpotatobase.org/brapi/v1/observations"
-dfr <- read.csv("tests/testthat/excel/18AMDPNaCRRI_final - Copy.csv")
-# #urltoken <- "sgn:eggplant@sweetpotatobase-test.sgn.cornell.edu/brapi/v1/token"
-
-out <- fbcheck::upload_studies(dbname= "sweetpotatobase",
-                               # urltoken = "sgn:eggplant@sweetpotatobase-test.sgn.cornell.edu/brapi/v1/token",
-                               # urlput=  "sgn:eggplant@sweetpotatobase-test.sgn.cornell.edu/brapi/v1/observations",
-                               urltoken = "https://sweetpotatobase.org/brapi/v1/token",
-                               urlput=  "https://sweetpotatobase.org/brapi/v1/observations",
-                               user= "obenites", password=password, dfr=";c8U:G&z:X")
-
-
+#  urltoken <- "https://sweetpotatobase.org/brapi/v1/token"
+#  urlput <- "https://sweetpotatobase.org/brapi/v1/observations"
+#  dfr <- readr::read_csv("tests/testthat/excel/18AMDPNaCRRI_final - Copy.csv")
+#  names(dfr) <- gsub("[[:space:]]", "", names(dfr))
+#  dfr <- tbl_df(dfr)
+#  # urltoken <- "sgn:eggplant@sweetpotatobase-test.sgn.cornell.edu/brapi/v1/token"
+# 
+# # out <- fbcheck::upload_studies(dbname= "sweetpotatobase",
+# #                                # urltoken = "sgn:eggplant@sweetpotatobase-test.sgn.cornell.edu/brapi/v1/token",
+# #                                # urlput=  "sgn:eggplant@sweetpotatobase-test.sgn.cornell.edu/brapi/v1/observations",
+# #                                urltoken = "https://sweetpotatobase.org/brapi/v1/token",
+# #                                urlput=  "https://sweetpotatobase.org/brapi/v1/observations",
+# #                                user= "obenites", password=password, dfr=";c8U:G&z:X")
+# 
+# 
 # white_list <- brapi::ba_db()
 # con <- white_list[[dbname]] #get list
 # con[["user"]] <- user
@@ -60,6 +75,6 @@ out <- fbcheck::upload_studies(dbname= "sweetpotatobase",
 # #xout <- httr::content(x = res)
 # #txt <- ifelse(res$status == 200, " ok!", " problem!")
 # out <- httr::content(res)
-# 
-# 
-# })
+# # # 
+# # # 
+# # # })
