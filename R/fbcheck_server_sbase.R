@@ -244,8 +244,8 @@ fbcheck_server_sbase <- function(input, output, session, values) {
                                 out <- fbcheck::upload_studies(dbname= "sweetpotatobase",
                                                      # urltoken = "sgn:eggplant@sweetpotatobase-test.sgn.cornell.edu/brapi/v1/token",
                                                      # urlput=  "sgn:eggplant@sweetpotatobase-test.sgn.cornell.edu/brapi/v1/observations",
-                                                     urltoken = "sweetpotatobase.org/brapi/v1/token",
-                                                     urlput=  "sweetpotatobase.org/brapi/v1/observations",
+                                                     urltoken = "https://sweetpotatobase.org/brapi/v1/token",
+                                                     urlput=  "https://sweetpotatobase.org/brapi/v1/observations",
                                                      user= user, password=password, dfr=fb)
                                 print("4")
                                 if(out$metadata$status[[6]]$code=="200"){
