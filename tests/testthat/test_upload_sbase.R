@@ -9,16 +9,24 @@
 # 
 # 
 # dbname<- "sweetpotatobase"
-# user <- "obenites"
-# password <- ";c8U:G&z:X"
+ user <- "obenites"
+ password <- ";c8U:G&z:X"
 # #user <- "iperezm"
 # #password <- "41954776"
 # 
 # urltoken <- "https://sweetpotatobase.org/brapi/v1/token"
 # urlput <- "https://sweetpotatobase.org/brapi/v1/observations"
-# dfr <- readr::read_csv("tests/testthat/excel/18AMDPNaCRRI_final - Copy.csv")
+dfr <- read.csv("tests/testthat/excel/18AMDPNaCRRI_final - Copy.csv")
 # #urltoken <- "sgn:eggplant@sweetpotatobase-test.sgn.cornell.edu/brapi/v1/token"
-# 
+
+out <- fbcheck::upload_studies(dbname= "sweetpotatobase",
+                               # urltoken = "sgn:eggplant@sweetpotatobase-test.sgn.cornell.edu/brapi/v1/token",
+                               # urlput=  "sgn:eggplant@sweetpotatobase-test.sgn.cornell.edu/brapi/v1/observations",
+                               urltoken = "https://sweetpotatobase.org/brapi/v1/token",
+                               urlput=  "https://sweetpotatobase.org/brapi/v1/observations",
+                               user= "obenites", password=password, dfr=";c8U:G&z:X")
+
+
 # white_list <- brapi::ba_db()
 # con <- white_list[[dbname]] #get list
 # con[["user"]] <- user
