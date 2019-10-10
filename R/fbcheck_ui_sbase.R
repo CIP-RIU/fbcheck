@@ -48,8 +48,15 @@ fbcheck_ui_sbase <- function(type="tab", title="Data Quality and Processing", na
                             #conditionalPanel(
                             #  condition = "input.fbdesign_dsource_sbase == 'FieldBookApp-SPBase'",
                             column(6, 
-                                   shiny::fileInput(inputId = "file_fbapp_sbase", label = "Choose CSV File", multiple = FALSE,
+                                   shiny::fileInput(inputId = "file_fbapp_sbase", label = "Choose CSV File", multiple = TRUE,
                                                     accept = c("text/csv","text/comma-separated-values,text/plain", ".csv")),
+                                   
+                                   #Temporal
+                                   # shiny::fileInput(inputId = "file_fbapp_sbase_temp", label = "Choose CSV File", multiple = TRUE,
+                                   #                  accept = c("text/csv","text/comma-separated-values,text/plain", ".csv")),
+                                   
+                                   infoBoxOutput("fbcheck_message_sbase", width = NULL),
+                                   #End temporal
                                    
                                    selectInput(inputId = "fbcheck_fbapp_ExportFormat_sbase",label = "Spreadsheet format download",
                                                choices = c("Standard", "SPBase Format"), selected = 2)
@@ -142,7 +149,7 @@ fbcheck_ui_sbase <- function(type="tab", title="Data Quality and Processing", na
                             fluidRow(
                               column(
                                 12,
-                                shinysky::shinyalert("alert_fbapp_warning_sbase", FALSE, auto.close.after = 4),
+                                shinysky::shinyalert("alert_fbapp_warning_sbase", FALSE, auto.close.after = 8),
                                 rHandsontableOutput("hot_btable_fbapp_sbase",height = "600px",width = "100%")
                               )
                             )

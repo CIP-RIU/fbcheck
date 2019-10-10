@@ -19,31 +19,48 @@ check_fbapp <- function(dfr){
   #fieldbook headers
   fb_headers <- names(dfr)
   #Crop Ontology (CO) headers
-  co_h_lg <- grepl(pattern = "CO", fb_headers) #logical exp. to detect co_headers
+  co_h_lg <- grepl(pattern = "//|CO", fb_headers) #logical exp. to detect co_headers
   co_cols <- dfr[co_h_lg] #detect Crop ontology columns 
   #Experiment columns: -get rid trait variables and retain experimental variables (plot, rep, year, etc)
-  exp_cols <- dfr[!co_h_lg]
+  #exp_cols <- dfr[!co_h_lg]
+  #dtexp: table with experimental columns
+  dtexp <- dfr[!co_h_lg]
   #ToDo: create two functions for check ontology terms (exist) and exp sol_headers
-  check_headers <- names(exp_cols) %in% sol_headers  
+  check_headers <- names(dtexp) %in% sol_headers  
   
+  #Non determined variables or headers( non-CO variables and non-experimental columns)
+  nod_headers <- names(dfr[,!co_h_lg])
+  nod_headers <- nod_headers[!stringr::str_detect(string =  nod_headers, pattern = names(dtexp))]
+  print("non headers")
+  print(nod_headers)
   
   if(nrow(dfr)==0){
     msg <- paste("There have been no changes in the dataset")
     status <- "error"
+    styleclass <- "danger"
   } else if(!is.element("plot_id", fb_headers)){ #Check #1
     msg <- paste("The variable 'plot_id' is missing. Must be included in order to upload into the database")
     status <- "error"
-  } else if(sum(names(exp_cols) %in% sol_headers) != length(names(exp_cols))) {
-    #Check #2
-    non_found<- names(exp_cols)[!check_headers]
-    msg <- paste("The variable(s)", non_found, "was (were) not found in the database. Refine your file before processing.")
+    styleclass <- "danger"
+  } else if(is.element( "plot_id", names(dt))){
+    msg <- paste("Plot_id column was not found. Please add it to upload in the database")
     status <- "error"
+    styleclass <- "danger"
+  }  else if(sum(names(dtexp) %in% sol_headers) != length(names(dtexp))) {
+    #Check #2
+    non_found<- names(dtexp)[!check_headers]
+    #msg <- paste("The variable(s)", non_found, "was (were) not found in the database. Refine your file before processing.")
+    msg <- paste("Dataset successfully uploaded in SweetPotatoBase. But the variable(s) '", paste(non_found,collapse=", "), 
+                 "' was (were) not found in the database. Only traits with CO idenfier will be updated.")
+    status <- "success"
+    styleclass <- "success"
   } else { #Check #3
     msg <-  paste("Great! Dataset successfully uploaded in SweetPotatoBase. ")
     status <- "success"
+    styleclass <- "success"
   }
   
-  out<- list(msg= msg, status=status)
+  out<- list(msg= msg, status=status, styleclass= styleclass)
   
 }
 

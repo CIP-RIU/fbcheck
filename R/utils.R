@@ -1,3 +1,16 @@
+# Form checker ------------------------------------------------------------
+
+#' Get headers from Solgenomic Databases
+#'
+get_solgenomic_headers <- function(){
+  
+  factors <- c("plot_name", "abbr_user", "plot_id", "block_number", "plot_number", "rep_number" , "row_number", "col_number",
+               "accession_name",  "is_a_control", "synosyms", "trial_name", "location_name", "year", "pedigree",
+               "tier", "seedlot_name", "seed_transaction_operator", "num_seed_per_plot", "range_number", "plot_geo_json",
+               "timestamp",	"person"	,"location",	"number")
+  
+}
+
 
 
 
@@ -431,10 +444,10 @@ fbapp2json <- function(dfr, token="lfsermmo93;3r"){
 #' @export
 
 upload_studies<- function(dbname= "sweetpotatobase", 
-                          #urltoken = "https://sweetpotatobase.org/brapi/v1/token",
-                          #urlput =   "https://sweetpotatobase.org/brapi/v1/observations",
-                          urltoken = "sgn:eggplant@sweetpotatobase-test.sgn.cornell.edu/brapi/v1/token",
-                          urlput = "sgn:eggplant@sweetpotatobase-test.sgn.cornell.edu/brapi/v1/observations",
+                          urltoken = "https://sweetpotatobase.org/brapi/v1/token",
+                          urlput =   "https://sweetpotatobase.org/brapi/v1/observations",
+                          #urltoken = "sgn:eggplant@sweetpotatobase-test.sgn.cornell.edu/brapi/v1/token",
+                          #urlput = "sgn:eggplant@sweetpotatobase-test.sgn.cornell.edu/brapi/v1/observations",
                           user= "obenites", password=";c8U:G&z:X",dfr){
   
   

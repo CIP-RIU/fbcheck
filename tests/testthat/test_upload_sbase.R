@@ -1,23 +1,23 @@
-# # # 
-# library(tidyr)
-# library(dplyr)
-# library(stringr)
-# library(fbcheck)
-# library(fbdesign)
-# # # context("Organoleptic forms test")
-# # # 
-# # # test_that("When F6 and F7 organolepticps NA logical", {
-# # # 
-# # # 
+# # # # 
+# # library(tidyr)
+# # library(dplyr)
+# # library(stringr)
+# # library(fbcheck)
+# # library(fbdesign)
+# # # # context("Organoleptic forms test")
+# # # # 
+# # # # test_that("When F6 and F7 organolepticps NA logical", {
+# # # # 
+# # # # 
 #  dbname<- "sweetpotatobase"
 #  user <- "obenites"
 #  password <- ";c8U:G&z:X"
-#  fb <- readr::read_csv("tests/testthat/excel/18AMDPNaCRRI_final - Copy.csv")
+#  fb <- readr::read_csv("/home/obenites/HIDAP_SB_1.0.0/fbcheck/tests/testthat/excel/18AMDPNaCRRI_final - Copy.csv")
 #  names(fb) <- gsub("[[:space:]]", "", names(fb))
 #  fb <- tbl_df(fb)
 # # #user <- "iperezm"
 # # #password <- "41954776"
-# 
+# # 
 # # out <- fbcheck::upload_studies(dbname= "sweetpotatobase",
 # #                                # urltoken = "sgn:eggplant@sweetpotatobase-test.sgn.cornell.edu/brapi/v1/token",
 # #                                # urlput=  "sgn:eggplant@sweetpotatobase-test.sgn.cornell.edu/brapi/v1/observations",
@@ -29,9 +29,13 @@
 # 
 #  urltoken <- "https://sweetpotatobase.org/brapi/v1/token"
 #  urlput <- "https://sweetpotatobase.org/brapi/v1/observations"
-#  dfr <- readr::read_csv("tests/testthat/excel/18AMDPNaCRRI_final - Copy.csv")
-#  names(dfr) <- gsub("[[:space:]]", "", names(dfr))
-#  dfr <- tbl_df(dfr)
+#  fb <- readr::read_csv("/home/obenites/HIDAP_SB_1.0.0/fbcheck/tests/testthat/excel/18AMDPNaCRRI_final - Copy.csv")
+#  names(fb) <- gsub("[[:space:]]", "", names(fb))
+#  fb <- tbl_df(fb)
+#  
+#  # dfr <- readr::read_csv("tests/testthat/excel/18AMDPNaCRRI_final - Copy.csv")
+#  # names(dfr) <- gsub("[[:space:]]", "", names(dfr))
+#  # dfr <- tbl_df(dfr)
 #  # urltoken <- "sgn:eggplant@sweetpotatobase-test.sgn.cornell.edu/brapi/v1/token"
 # 
 # # out <- fbcheck::upload_studies(dbname= "sweetpotatobase",
@@ -75,6 +79,6 @@
 # #xout <- httr::content(x = res)
 # #txt <- ifelse(res$status == 200, " ok!", " problem!")
 # out <- httr::content(res)
-# # # 
-# # # 
-# # # })
+# # # # 
+# # # # 
+# # # # })

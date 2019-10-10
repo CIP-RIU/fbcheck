@@ -62,19 +62,81 @@ fbcheck_server_sbase <- function(input, output, session, values) {
     
   })
   
-  # Load dataset ---------------------------------------------
+  #Begin Load dataset ---------------------------------------------
+  # fb_sbase <- function(){
+  #   ####### Import CSV data #######
+  #   #file_fbapp <- input$file_fbapp_sbase
+  #   if (is.null(input$file_fbapp_sbase)) {
+  #     #shinyjs::disable("saveData")  # Codigo R.ARIAS  SAVE
+  #     return(NULL)
+  #   } else {
+  #     dt <- readr::read_csv(input$file_fbapp_sbase$datapath)  # Codigo R.ARIAS SAVE
+  #     #shinyjs::enable("saveData")
+  #   }
+  # 
+  # }
+  #End load dataset ---------------------------------------------
+  
+  #NEW CODE
   fb_sbase <- function(){
+    
+    try({
+    
     ####### Import CSV data #######
     #file_fbapp <- input$file_fbapp_sbase
-    if (is.null(input$file_fbapp_sbase)) {
+    if (is.null(input$file_fbapp_sbase)) { 
       #shinyjs::disable("saveData")  # Codigo R.ARIAS  SAVE
       return(NULL)
     } else {
-      dt <- readr::read_csv(input$file_fbapp_sbase$datapath)  # Codigo R.ARIAS SAVE
+      
+      if(length(input$file_fbapp_sbase)==1){
+        fb <- readr::read_csv(input$file_fbapp_sbase$datapath)  # Codigo R.ARIAS SAVE
+      } else {
+        print(input$file_fbapp_sbase)
+        
+        files_list <- input$file_fbapp_sbase
+        files_list <- files_list$datapath
+        print(files_list)
+        n <- length(files_list)
+        combine <- vector("list", length=n)
+        for(i in seq.int(files_list)){  
+          combine[[i]] <- readr::read_csv(files_list[i],na = "")  
+        }
+        fb <- data.table::rbindlist(combine,fill = TRUE)
+        fb <- as.data.frame(fb,stringsAsFactors=FALSE)
+      }
       #shinyjs::enable("saveData")
     }
-  
+    fb
+    })
   }
+  
+  output$fbcheck_message_sbase <- shinydashboard::renderInfoBox({
+  
+    
+   if(class(fb_sbase())=="error" ){
+      infoBox(title="Error", 
+              subtitle = paste("There exist inconsistencies in your excel files"),  icon = icon("refresh"),
+              color = "red",fill = TRUE, width = NULL)
+   } else if(class(fb_sbase())=="NULL"){
+     infoBox(title="Import file", 
+             subtitle = paste("Import your field book file"), icon= icon("upload", lib = "glyphicon"),
+             color = "blue",fill = TRUE, width = NULL)
+   } else if(length(fb_sbase()$accession_name[!is.na(fb_sbase()$accession_name)])!=nrow(fb_sbase())) {
+    infoBox(title="Error", 
+            subtitle = paste("There are missing accession names. Check your file"),  icon = icon("refresh"),
+            color = "red",fill = TRUE, width = NULL)
+   } else {
+     infoBox(title="Imported file", 
+             subtitle = paste("File successfully uploaded"), icon=  icon("ok", lib = "glyphicon"),
+             color = "green",fill = TRUE, width = NULL)
+    }
+    
+  })
+    
+  #END NEW CODE
+  
+  
   
   #hot_btable represents fieldbook data ----------------------
   output$hot_btable_fbapp_sbase <-  renderRHandsontable({
@@ -229,27 +291,29 @@ fbcheck_server_sbase <- function(input, output, session, values) {
                           else {
                             incProgress(2/6, detail = paste("Checking data..."))
                         
-                            print(head(fb,n = 4))
-                            print(user)
-                            print(password)
-                            
+                         
                            res2<- fbcheck::check_credentials(dbname= "sweetpotatobase", user=user, password=password,
-                                                             urltoken= "sgn:eggplant@sweetpotatobase-test.sgn.cornell.edu/brapi/v1/token")
-                                                             #urltoken= "https://sweetpotatobase.org/brapi/v1/token") 
+                                                             #urltoken= "sgn:eggplant@sweetpotatobase-test.sgn.cornell.edu/brapi/v1/token")
+                                                             urltoken= "https://sweetpotatobase.org/brapi/v1/token") 
                               
                            if(res2$status=="error"){
                                 shinysky::showshinyalert(session, "alert_fbappsbase_upload", paste(res2$msg), styleclass = "danger")
                                 incProgress(6/6, detail = paste("Errors detected"))
                            } else {
                                 out <- fbcheck::upload_studies(dbname= "sweetpotatobase",
-                                                      urltoken = "sgn:eggplant@sweetpotatobase-test.sgn.cornell.edu/brapi/v1/token",
-                                                      urlput=  "sgn:eggplant@sweetpotatobase-test.sgn.cornell.edu/brapi/v1/observations",
-                                                     #urltoken = "https://sweetpotatobase.org/brapi/v1/token",
-                                                     #urlput=  "https://sweetpotatobase.org/brapi/v1/observations",
+                                                      #urltoken = "sgn:eggplant@sweetpotatobase-test.sgn.cornell.edu/brapi/v1/token",
+                                                      #urlput=  "sgn:eggplant@sweetpotatobase-test.sgn.cornell.edu/brapi/v1/observations",
+                                                     urltoken = "https://sweetpotatobase.org/brapi/v1/token",
+                                                     urlput=  "https://sweetpotatobase.org/brapi/v1/observations",
                                                      user= user, password=password, dfr=fb)
                                 print("4")
                                 if(out$metadata$status[[6]]$code=="200"){
-                                  shinysky::showshinyalert(session, "alert_fbappsbase_upload", paste(res$msg), styleclass = "success")  
+                                  
+                                  #shinysky::showshinyalert(session, "alert_fbappsbase_upload", paste(res$msg), styleclass = "success")  
+                                  #New code
+                                  shinysky::showshinyalert(session = session, id = "alert_fbappsbase_upload", paste(res$msg), styleclass = res$styleclass) 
+                                  #End new code
+                                  
                                   print("5") 
                                   incProgress(5/6, detail = paste("Finishing upload to SweetPotatoBase..."))
                                   incProgress(6/6, detail = paste("Refreshing page..."))
@@ -278,6 +342,10 @@ fbcheck_server_sbase <- function(input, output, session, values) {
     },
     content = function(con) {
      
+      
+    #fb22 <<- fb_sbase()
+    #saveRDS(fb, file = "/tests/testthat/excel/combine_fb_1.rds")
+      
      shiny::withProgress(message = 'Downloading file', value = 0, {
         incProgress(1/6, detail = paste("Reading table data..."))
         
