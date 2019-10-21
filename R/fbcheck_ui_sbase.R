@@ -149,7 +149,7 @@ fbcheck_ui_sbase <- function(type="tab", title="Data Quality and Processing", na
                             fluidRow(
                               column(
                                 12,
-                                shinysky::shinyalert("alert_fbapp_warning_sbase", FALSE, auto.close.after = 8),
+                                shinysky::shinyalert("alert_fbapp_warning_sbase", FALSE, auto.close.after = 11),
                                 rHandsontableOutput("hot_btable_fbapp_sbase",height = "600px",width = "100%")
                               )
                             )

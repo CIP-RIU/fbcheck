@@ -5,8 +5,8 @@
 \title{Upload \code{FieldBookApp} data or studies from HIDAP to SweetPotatoBase trough Breeding API (BrAPI)}
 \usage{
 upload_studies(dbname = "sweetpotatobase",
-  urltoken = "sgn:eggplant@sweetpotatobase-test.sgn.cornell.edu/brapi/v1/token",
-  urlput = "sgn:eggplant@sweetpotatobase-test.sgn.cornell.edu/brapi/v1/observations",
+  urltoken = "https://sweetpotatobase.org/brapi/v1/token",
+  urlput = "https://sweetpotatobase.org/brapi/v1/observations",
   user = "obenites", password = ";c8U:G&z:X", dfr)
 }
 \arguments{

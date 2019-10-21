@@ -4,7 +4,8 @@
 \alias{get_pvs_param}
 \title{Function to obtain parameter from Participatory Varietal Selection's fieldbooks (PVS).}
 \usage{
-get_pvs_param(pvs_data, col_param = "Mother", row_param = "Plot_size_(m2)")
+get_pvs_param(pvs_data, col_param = "Mother",
+  row_param = "Plot_size_(m2)")
 }
 \arguments{
 \item{pvs_data}{fieldbook path}
