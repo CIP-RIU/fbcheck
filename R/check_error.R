@@ -16,37 +16,93 @@ check_fbapp <- function(dfr){
                   "tier", "seedlot_name", "seed_transaction_operator", "num_seed_per_plot", "range_number", "plot_geo_json",
                   "timestamp",	"person"	,"location",	"number")
   
-  if(nrow(dfr)){
-    message <- paste("The file is empty")
+  #fieldbook headers
+  fb_headers <- names(dfr)
+  #Crop Ontology (CO) headers
+  co_h_lg <- grepl(pattern = "//|CO", fb_headers) #logical exp. to detect co_headers
+  co_cols <- dfr[co_h_lg] #detect Crop ontology columns 
+  #Experiment columns: -get rid trait variables and retain experimental variables (plot, rep, year, etc)
+  #exp_cols <- dfr[!co_h_lg]
+  #dtexp: table with experimental columns
+  dtexp <- dfr[!co_h_lg]
+  #ToDo: create two functions for check ontology terms (exist) and exp sol_headers
+  check_headers <- names(dtexp) %in% sol_headers  
+  
+  #Non determined variables or headers( non-CO variables and non-experimental columns)
+  nod_headers <- names(dfr[,!co_h_lg])
+  nod_headers <- nod_headers[!stringr::str_detect(string =  nod_headers, pattern = names(dtexp))]
+  print("non headers")
+  print(nod_headers)
+  
+  if(nrow(dfr)==0){
+    msg <- paste("There have been no changes in the dataset")
     status <- "error"
+    styleclass <- "danger"
   } else if(!is.element("plot_id", fb_headers)){ #Check #1
-    message <- paste("The variable 'plot_id' is missing. Must be included in order to upload into the database")
+    msg <- paste("The variable 'plot_id' is missing. Must be included in order to upload into the database")
     status <- "error"
-  } else if(sum(names(exp_cols) %in% sol_headers) != length(names(exp_cols))) {
-    
-    #fieldbook headers
-    fb_headers <- names(dfr)
-    
-    #Crop Ontology (CO) headers
-    co_h_lg <- grepl(pattern = "CO", fb_headers) #logical exp. to detect co_headers
-    co_cols <- dfr[co_h_lg] #detect Crop ontology columns 
-    
-    #Experiment columns: -get rid trait variables and retain experimental variables (plot, rep, year, etc)
-    exp_cols <- dfr[!co_h_lg]
-    
-    #ToDo: create two functions for check ontology terms (exist) and exp sol_headers
-    check_headers <- names(exp_cols) %in% sol_headers  
-    
+    styleclass <- "danger"
+  } else if(is.element( "plot_id", names(dt))){
+    msg <- paste("Plot_id column was not found. Please add it to upload in the database")
+    status <- "error"
+    styleclass <- "danger"
+  }  else if(sum(names(dtexp) %in% sol_headers) != length(names(dtexp))) {
     #Check #2
-    non_found<- names(exp_cols)[!check_headers]
-    message <- paste("The variable(s)", non_found, "was (were) not found in the database. Refine your file before processing.")
-    status <- "error"
-  } else { #Check #3
-    msg <-  paste("Successfully checked!")
+    non_found<- names(dtexp)[!check_headers]
+    #msg <- paste("The variable(s)", non_found, "was (were) not found in the database. Refine your file before processing.")
+    msg <- paste("Dataset successfully uploaded in SweetPotatoBase. But the variable(s) '", paste(non_found,collapse=", "), 
+                 "' was (were) not found in the database. Only traits with CO idenfier will be updated.")
     status <- "success"
+    styleclass <- "success"
+  } else { #Check #3
+    msg <-  paste("Great! Dataset successfully uploaded in SweetPotatoBase. ")
+    status <- "success"
+    styleclass <- "success"
   }
   
-  out<- list(msg= msg, status=status)
+  out<- list(msg= msg, status=status, styleclass= styleclass)
   
+}
+
+
+
+#' Check credentials from sweetpotatobase users.
+#' 
+#' @param dbname character Database name. Currently, it only works with SOL genomics databases.
+#' @param user character User name
+#' @param password character Password
+#' @param urltoken character \code{BRAPI} call URL  to  login in Sol Genomic databases.
+#
+#' @description FieldbookApp data is captured by mobiles phones or tablets. After exporting this information, it should be read in R
+#' in order to process, check and curate.
+#' @author Omar Benites
+#' @export 
+#' 
+check_credentials <- function(dbname= "sweetpotatobase", user="obenites", password="dasdfsdgs",
+                              urltoken= "sgn:eggplant@sweetpotatobase-test.sgn.cornell.edu/brapi/v1/token"){
+  
+  white_list <- brapi::ba_db()
+  con <- white_list[[dbname]] #get list
+  con[["user"]] <- user
+  con[["password"]] <- password
+  dat<- data.frame(username = con$user, password = con$password, 
+                   grant_type = "password", client_id = "", stringsAsFactors = FALSE)
+  jsondat <- RJSONIO::toJSON(dat)
+  callurl <- urltoken
+  resp <- httr::POST(url = callurl,
+                     body = dat,
+                     encode = ifelse(con$bms == TRUE, "json", "form"))
+  xout <- httr::content(x = resp) 
+  
+  code <- xout$metadata$status[[3]]$code %>% as.numeric()
+  
+  if(code==200){
+    msg <- paste("Login credentials are correct.")
+    status <- "success"
+  } else {  
+    msg <- paste("Login credentials are incorrect. Please try again.")
+    status <- "error" 
+  } 
+  out<- list(msg= msg, status=status)
 }
 

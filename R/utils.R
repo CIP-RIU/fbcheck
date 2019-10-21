@@ -1,3 +1,16 @@
+# Form checker ------------------------------------------------------------
+
+#' Get headers from Solgenomic Databases
+#'
+get_solgenomic_headers <- function(){
+  
+  factors <- c("plot_name", "abbr_user", "plot_id", "block_number", "plot_number", "rep_number" , "row_number", "col_number",
+               "accession_name",  "is_a_control", "synosyms", "trial_name", "location_name", "year", "pedigree",
+               "tier", "seedlot_name", "seed_transaction_operator", "num_seed_per_plot", "range_number", "plot_geo_json",
+               "timestamp",	"person"	,"location",	"number")
+  
+}
+
 
 
 
@@ -349,8 +362,8 @@ hidap2fbApp <- function(fieldbook) {
 }
 
 #' Update rhandsontable
-#' @param fieldbook field data trough rhandsontable
-#' @description get updates from rhandonstable after user modifications
+#' @param fieldbook data.frame field data trough rhandsontable
+#' @description Get updates from rhandonstable after user modifications
 #' @author Omar Benites 
 #' @export
 
@@ -364,12 +377,13 @@ rhandsontable_update<- function(fieldbook){
 #' Convert FieldbookApp data to json structures
 #' 
 #' @param dfr data.frame 
+#' @param token character Token is provided by SOL genomics databases through \code{BRAPI} calls.
 #' @description FieldbookApp files (csv) should be transformed into json files in order to upload into Sol genomics databases.
 #' @author Omar Benites
 #' @export
 # @param database character Choose a database at which you are extracting data.
 
-fbapp2json <- function(dfr){
+fbapp2json <- function(dfr, token="lfsermmo93;3r"){
   
   headers<- c("plot_name", "plot_id", "block_number", "plot_number", "rep_number" , "row_number", "col_number",
               "accession_name",  "is_a_control", "synosyms", "trial_name", "location_name", "year", "pedigree",
@@ -401,16 +415,81 @@ fbapp2json <- function(dfr){
   tfb <- tfb %>% dplyr::filter(complete.cases(.))
   
   #rename first column for: "observationUnitDbID" (brapi standard)
-  names(tfb)[1] <- "observationUnitDbID"
-  tfb[,"observationUnitDbID"]<- as.character(tfb[, "observationUnitDbID"]) #Brapi format
+  names(tfb)[1] <- "observationUnitDbId"
+  tfb[,"observationUnitDbId"]<- as.character(tfb[, "observationUnitDbId"]) #Brapi format
   
   #Include access_token and Observations in the json format
-  tfb2list <- list(access_token= "RbgKDBRxmkdopsa2f40", Observations = tfb)#pass data.frame as element of the list
-  #tfb2list <- list(observations = tfb)#pass data.frame as element of the list
-  
+  tfb2list <- list(access_token= token, observations = tfb)#pass data.frame as element of the list
   #list To Json
-  list2json <- jsonlite::toJSON(tfb2list)
-  
+  list2json<- jsonlite::toJSON(tfb2list, auto_unbox = TRUE)
+  #tfb2list <- list(observations = tfb)#pass data.frame as element of the list
+
 }
 
 
+#' Upload \code{FieldBookApp} data or studies from HIDAP to SweetPotatoBase trough Breeding API (BrAPI)
+#' 
+#' @description Plant breeders' tasks involve the collection, curation and preservation of field data. 
+#' The FieldBookApp mobile application provide mobile-based data collection. Then, researchers
+#' curate all this information in \code{HIDAP} (online and offline); and subsequently, 
+#' they will upload each dataset to \code{SweetPotatoBase} (a \code{SolGenomics} Database). 
+#' The latter mentioned is performed through the Breeding API (\code{BrAPI}) (see \code{https://brapi.docs.apiary.io}). 
+#' @param dbname character Database name. Currently, it only works with SOL genomics databases.
+#' @param urltoken character \code{BRAPI} call URL  to  login in Sol Genomic databases.
+#' @param urlput character \code{BRAPI} call to \code{PUT} URL to studies.
+#' @param user character User name
+#' @param password character Password
+#' @param dfr data.frame Fieldbook data collected by FieldBookApp.
+#' @author Omar Benites
+#' @export
+
+upload_studies<- function(dbname= "sweetpotatobase", 
+                          urltoken = "https://sweetpotatobase.org/brapi/v1/token",
+                          urlput =   "https://sweetpotatobase.org/brapi/v1/observations",
+                          #urltoken = "sgn:eggplant@sweetpotatobase-test.sgn.cornell.edu/brapi/v1/token",
+                          #urlput = "sgn:eggplant@sweetpotatobase-test.sgn.cornell.edu/brapi/v1/observations",
+                          user= "obenites", password=";c8U:G&z:X",dfr){
+  
+  
+  # dt2<- readr::read_csv(file = "/home/obenites/HIDAP_SB_1.0.0/utils/plot_id_tableFormatFbApp_2018FUMASUA.csv")
+  # dbname= "sweetpotatobase"; 
+  # urltoken = "sgn:eggplant@sweetpotatobase-test.sgn.cornell.edu/brapi/v1/token";
+  # urlput =   "sgn:eggplant@sweetpotatobase-test.sgn.cornell.edu/brapi/v1/observations";
+  # user= "obenites"; 
+  # password=";c8U:G&z:X";dfr=dt2
+  
+  
+  #TODO
+  #-check if user and password needed
+  #-check validation of user and password
+  white_list <- brapi::ba_db()
+  con <- white_list[[dbname]] #get list
+  con[["user"]] <- user
+  con[["password"]] <- password
+  dat<- data.frame(username = con$user, password = con$password, 
+                   grant_type = "password", client_id = "", stringsAsFactors = FALSE)
+  jsondat <- RJSONIO::toJSON(dat)
+  callurl <- urltoken
+  resp <- httr::POST(url = callurl,
+                     body = dat,
+                     encode = ifelse(con$bms == TRUE, "json", "form"))
+  xout <- httr::content(x = resp)
+  token <- xout$access_token
+  con$token <- token
+  con$expires_in <- httr::content(x = resp)$expires_in
+  #jsonview::json_tree_view(xout) #json tree view
+  fbjson <- fbcheck::fbapp2json(dfr = dfr, token = con$token)
+  #jsonview::json_tree_view(fbjson)
+  #-----  PUT to sweetpotatobase --------------------------------------------------------------
+  url <- urlput #"sgn:eggplant@sweetpotatobase-test.sgn.cornell.edu/brapi/v1/observations"
+  body<- fbjson #from fb2json
+  h <- c(con$token)
+  tokenName <-  'X-Auth-Token'
+  names(h) <- tokenName
+  res <- httr::PUT(url = url, body = body, encode = "json", timeout(450000), #timeout:3 minutes, in case of having big data frames
+                   httr::add_headers(`X-AUTH-TOKEN` = con$token))
+  #xout <- httr::content(x = res)
+  #txt <- ifelse(res$status == 200, " ok!", " problem!")
+  out <- httr::content(res)
+  #jsonview::json_tree_view(out)
+} 
