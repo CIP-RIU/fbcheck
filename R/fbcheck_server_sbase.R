@@ -18,9 +18,6 @@ fbcheck_server_sbase <- function(input, output, session, values) {
   # db$constDBHost <- "176.34.248.121"
   ################################ R. ARIAS###############################################
   
-  #Catch the file path for reading fieldbook sheets
-  volumes <- shinyFiles::getVolumes()
-  
   #----Return the type of crop in Minimal sheet -------------
   hot_crop_sbase <- reactive({
     
@@ -92,8 +89,7 @@ fbcheck_server_sbase <- function(input, output, session, values) {
       if(length(input$file_fbapp_sbase)==1){
         fb <- readr::read_csv(input$file_fbapp_sbase$datapath)  # Codigo R.ARIAS SAVE
       } else {
-        print(input$file_fbapp_sbase)
-        
+      
         files_list <- input$file_fbapp_sbase
         files_list <- files_list$datapath
         print(files_list)
@@ -126,6 +122,12 @@ fbcheck_server_sbase <- function(input, output, session, values) {
     infoBox(title="Error", 
             subtitle = paste("There are missing accession names. Check your file"),  icon = icon("refresh"),
             color = "red",fill = TRUE, width = NULL)
+   } else if( length(ck_duplicate(fb_sbase(),"plot_name"))>1 ){
+     dup_values <- paste(ck_duplicate(fb_sbase(),"plot_name"),collasep=", ")
+     infoBox(title="Error", 
+             subtitle = paste0("There duplications entries in plot_name: ", dup_values),  icon = icon("refresh"),
+             color = "red",fill = TRUE, width = NULL)
+     
    } else {
      infoBox(title="Imported file", 
              subtitle = paste("File successfully uploaded"), icon=  icon("ok", lib = "glyphicon"),

@@ -1,3 +1,7 @@
+#' @importFrom magrittr %>%
+#' @export
+magrittr::`%>%`
+
 # Form checker ------------------------------------------------------------
 
 #' Get headers from Solgenomic Databases

@@ -1,3 +1,35 @@
+#' Check duplicates entries in FieldBookApp data
+#' 
+#' @param dfr data frame. FieldBookApp data.
+#' @param attribute character. Column name for checking whether duplicates values exist in FieldBookApp data 
+#' @description Check duplicated entries in specific attributes, ex. \code{"plot_name"}, in FieldBookApp data 
+#' @author Omar Benites
+#' @examples 
+#' dfr<- data.frame(plot_name= paste0("plot_","rep_",1:3), value= 1:3)
+#' ck_duplicate(dfr,"plot_name")
+#' dfr2<- data.frame(plot_name= rep(paste0("plot_","rep_",1:3),2), value= 1:6)
+#' ck_duplicate(dfr2,"plot_name")
+#' @export
+
+
+ck_duplicate <-  function(dfr=data.frame(), attribute){
+
+  if(nrow(dfr)>0){
+      #Check frequency
+      tb_dup <- data.frame(table(dfr[,attribute]))
+      if(nrow(tb_dup)>0){
+        dup <- as.character(tb_dup[tb_dup$Freq>1,1]) 
+      } else {
+        dup <- NULL
+      }
+  } else {
+    dup <- NULL
+  }
+  
+  
+}
+
+
 
 #' Check error in FieldbookApp data
 #' 
