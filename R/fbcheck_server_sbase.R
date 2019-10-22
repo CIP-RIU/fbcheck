@@ -127,7 +127,12 @@ fbcheck_server_sbase <- function(input, output, session, values) {
      infoBox(title="Error", 
              subtitle = paste0("There duplications entries in plot_name: ", dup_values),  icon = icon("refresh"),
              color = "red",fill = TRUE, width = NULL)
-     
+   } else if( length(ck_duplicate(fb_sbase(),"plot_id"))>1 ){
+     dup_values <- paste(ck_duplicate(fb_sbase(),"plot_id"),collasep=", ")
+     infoBox(title="Error", 
+             subtitle = paste0("There duplications entries in plot_name: ", dup_values),  icon = icon("refresh"),
+             color = "red",fill = TRUE, width = NULL)
+        
    } else {
      infoBox(title="Imported file", 
              subtitle = paste("File successfully uploaded"), icon=  icon("ok", lib = "glyphicon"),
