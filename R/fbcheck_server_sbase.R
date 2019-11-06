@@ -113,19 +113,23 @@ fbcheck_server_sbase <- function(input, output, session, values) {
       infoBox(title="Error", 
               subtitle = paste("There exist inconsistencies in your excel files"),  icon = icon("refresh"),
               color = "red",fill = TRUE, width = NULL)
+     
    } else if(class(fb_sbase())=="NULL"){
      infoBox(title="Import file", 
              subtitle = paste("Import your field book file"), icon= icon("upload", lib = "glyphicon"),
              color = "blue",fill = TRUE, width = NULL)
+     
    } else if(length(fb_sbase()$accession_name[!is.na(fb_sbase()$accession_name)])!=nrow(fb_sbase())) {
     infoBox(title="Error", 
             subtitle = paste("There are missing accession names. Check your file"),  icon = icon("refresh"),
             color = "red",fill = TRUE, width = NULL)
+     
    } else if( length(ck_duplicate(fb_sbase(),"plot_name"))>1 ){
      dup_values <- paste(ck_duplicate(fb_sbase(),"plot_name"),collasep=", ")
      infoBox(title="Error", 
              subtitle = paste0("There duplications entries in plot_name: ", dup_values),  icon = icon("refresh"),
              color = "red",fill = TRUE, width = NULL)
+     
    } else if( length(ck_duplicate(fb_sbase(),"plot_id"))>1 ){
      dup_values <- paste(ck_duplicate(fb_sbase(),"plot_id"),collasep=", ")
      infoBox(title="Error", 
@@ -133,9 +137,9 @@ fbcheck_server_sbase <- function(input, output, session, values) {
              color = "red",fill = TRUE, width = NULL)
         
    } else if( all(grepl("CO_", names(fb_sbase()))!=TRUE)){
-     dup_values <- paste(ck_duplicate(fb_sbase(),"plot_id"),collasep=", ")
+     #dup_values <- paste(ck_duplicate(fb_sbase(),"plot_id"),collasep=", ")
      infoBox(title="Error", 
-             subtitle = paste0("Any traits have been identified in this file.", dup_values),  icon = icon("refresh"),
+             subtitle = paste0("Any traits have been identified in this file."),  icon = icon("refresh"),
              color = "red",fill = TRUE, width = NULL)
      
    } else {

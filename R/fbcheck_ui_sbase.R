@@ -55,7 +55,7 @@ fbcheck_ui_sbase <- function(type="tab", title="Data Quality and Processing", na
                                    # shiny::fileInput(inputId = "file_fbapp_sbase_temp", label = "Choose CSV File", multiple = TRUE,
                                    #                  accept = c("text/csv","text/comma-separated-values,text/plain", ".csv")),
                                    
-                                   infoBoxOutput("fbcheck_message_sbase", width = NULL),
+                                   shinydashboard::infoBoxOutput("fbcheck_message_sbase", width = NULL),
                                    #End temporal
                                    
                                    selectInput(inputId = "fbcheck_fbapp_ExportFormat_sbase",label = "Spreadsheet format download",
