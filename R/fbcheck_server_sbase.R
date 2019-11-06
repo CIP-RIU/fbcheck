@@ -92,7 +92,6 @@ fbcheck_server_sbase <- function(input, output, session, values) {
       
         files_list <- input$file_fbapp_sbase
         files_list <- files_list$datapath
-        print(files_list)
         n <- length(files_list)
         combine <- vector("list", length=n)
         for(i in seq.int(files_list)){  
@@ -133,7 +132,7 @@ fbcheck_server_sbase <- function(input, output, session, values) {
              subtitle = paste0("There duplications entries in plot_name: ", dup_values),  icon = icon("refresh"),
              color = "red",fill = TRUE, width = NULL)
         
-   } else if( all(grepl("CO_", names(fb_sbase()) )!=TRUE)){
+   } else if( all(grepl("CO_", names(fb_sbase()))!=TRUE)){
      dup_values <- paste(ck_duplicate(fb_sbase(),"plot_id"),collasep=", ")
      infoBox(title="Error", 
              subtitle = paste0("Any traits have been identified in this file.", dup_values),  icon = icon("refresh"),

@@ -17,6 +17,8 @@ Check duplicated entries in specific attributes, ex. \code{"plot_name"}, in Fiel
 \examples{
 dfr<- data.frame(plot_name= paste0("plot_","rep_",1:3), value= 1:3)
 ck_duplicate(dfr,"plot_name")
+dfr2<- data.frame(plot_name= rep(paste0("plot_","rep_",1:3),2), value= 1:6)
+ck_duplicate(dfr2,"plot_name")
 }
 \author{
 Omar Benites
