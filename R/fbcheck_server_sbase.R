@@ -127,13 +127,13 @@ fbcheck_server_sbase <- function(input, output, session, values) {
    } else if( length(ck_duplicate(fb_sbase(),"plot_name"))>1 ){
      dup_values <- paste(ck_duplicate(fb_sbase(),"plot_name"),collasep=", ")
      infoBox(title="Error", 
-             subtitle = paste0("There duplications entries in plot_name: ", dup_values),  icon = icon("refresh"),
+             subtitle = paste0("There duplications entries in plot_name: ", dup_values[1]),  icon = icon("refresh"),
              color = "red",fill = TRUE, width = NULL)
      
    } else if( length(ck_duplicate(fb_sbase(),"plot_id"))>1 ){
      dup_values <- paste(ck_duplicate(fb_sbase(),"plot_id"),collasep=", ")
      infoBox(title="Error", 
-             subtitle = paste0("There duplications entries in plot_name: ", dup_values),  icon = icon("refresh"),
+             subtitle = paste0("There duplications entries in plot_name: ", dup_values[1]),  icon = icon("refresh"),
              color = "red",fill = TRUE, width = NULL)
         
    } else if( all(grepl("CO_", names(fb_sbase()))!=TRUE)){
