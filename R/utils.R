@@ -15,6 +15,25 @@ get_solgenomic_headers <- function(){
   
 }
 
+#' Remove empty rows/columns from a data.frame or matrix
+#' @param fb fieldbook data
+#' @param header header's names to be removed
+#' @param whichv one of "rows", "cols", or c("rows", "cols"). Where no value of which is provided, defaults to removing both empty rows and empty columns, declaring the behavior with a printed message.
+#'   
+remove_empty_fbapp <- function(fb, header = NULL, whichv="rows"){
+  
+  fb_temp <- fb
+  if(whichv=="rows"){
+    header_pos <- which(names(fb_temp) %in% header)
+    fb_temp <- fb_temp[,-header_pos]
+    fb_temp <- janitor::remove_empty(fb_temp, which = "rows")
+  } else {
+    fb_temp<- data.frame()
+  }
+  rownames_non_empty <- rownames(fb_temp)
+  fb <- fb[rownames_non_empty,]
+  
+}
 
 
 

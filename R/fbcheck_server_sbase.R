@@ -99,6 +99,10 @@ fbcheck_server_sbase <- function(input, output, session, values) {
         }
         fb <- data.table::rbindlist(combine,fill = TRUE)
         fb <- as.data.frame(fb,stringsAsFactors=FALSE)
+        print(nrow(fb))
+        print(get_solgenomic_headers())
+        fb <- remove_empty_fbapp(fb, header = get_solgenomic_headers(), whichv="rows")
+        #saveRDS(fb, file = "/home/obenites/HSBASE/fbcheck/tests/testthat/excel/fbcombined.rds")
       }
       #shinyjs::enable("saveData")
     }
@@ -124,16 +128,20 @@ fbcheck_server_sbase <- function(input, output, session, values) {
             subtitle = paste("There are missing accession names. Check your file"),  icon = icon("refresh"),
             color = "red",fill = TRUE, width = NULL)
      
+   } else if (!is.element("plot_id",names(fb_sbase()))) {
+     infoBox(title="Error", 
+             subtitle = paste0("There is no plot id"),  icon = icon("refresh"),
+             color = "red",fill = TRUE, width = NULL)
    } else if( length(ck_duplicate(fb_sbase(),"plot_name"))>1 ){
      dup_values <- paste(ck_duplicate(fb_sbase(),"plot_name"),collasep=", ")
      infoBox(title="Error", 
-             subtitle = paste0("There duplications entries in plot_name: ", dup_values[1]),  icon = icon("refresh"),
+             subtitle = paste0("There duplications entries in plot_name"),  icon = icon("refresh"),
              color = "red",fill = TRUE, width = NULL)
      
    } else if( length(ck_duplicate(fb_sbase(),"plot_id"))>1 ){
      dup_values <- paste(ck_duplicate(fb_sbase(),"plot_id"),collasep=", ")
      infoBox(title="Error", 
-             subtitle = paste0("There duplications entries in plot_name: ", dup_values[1]),  icon = icon("refresh"),
+             subtitle = paste0("There duplications entries in plot_name"),  icon = icon("refresh"),
              color = "red",fill = TRUE, width = NULL)
         
    } else if( all(grepl("CO_", names(fb_sbase()))!=TRUE)){
@@ -223,6 +231,9 @@ fbcheck_server_sbase <- function(input, output, session, values) {
       dsource <- 2
       traits <- traittools::get_trait_fb(DF, dsource = dsource)
       
+      #------ End: Graphs Content --------------------------
+      
+      
       file_fbapp <- input$file_fbapp_sbase
       value_datapath <- file_fbapp$datapath 
       fileNameExtFile <- paste0(dirNameExtFile, servName) #file.path(fbglobal::get_base_dir(), "fbappdatapath.rds")
@@ -232,6 +243,9 @@ fbcheck_server_sbase <- function(input, output, session, values) {
       crop <- hot_crop_sbase()
       trait_dict <- get_crop_ontology(crop = crop, dsource = dsource)
       traittools::col_render_trait(fieldbook = DF, trait = traits , trait_dict = trait_dict, dsource = dsource) 
+      
+      
+      
       
     #}
   })
@@ -400,6 +414,25 @@ fbcheck_server_sbase <- function(input, output, session, values) {
       })
     }
   )
+  
+  #------Log button --------------------------
+  
+  #observeEvent(input$tabBut,{
+    # insertUI(selector = "#logContent",
+    #          where = "afterBegin",
+    #          ui = column(12,
+    #                      textInput("txtNumDuplicatedPlotId","Number of Duplicated Plot DB Id's",
+    #                                value = traittools::get_duplicate_db_id() )
+    #          ) 
+    # )
+  #})
+  
+
+  
+  
+  
+  
+  
   ################################## R .ARIAS ################
   # observeEvent(input$saveData,{
   #   if(!session$userData$logged){

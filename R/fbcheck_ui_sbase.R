@@ -1,5 +1,6 @@
 #' UI for traittools and data quality for HIDAP-SweetPotatoBase
 #' Returns user friendly ui for HIDAP-SweetPotatoBase
+#' 
 #' @author Omar Benites
 #' @param type type of UI element, deault is a tab in a shinydashboard
 #' @param title display title name
@@ -59,7 +60,10 @@ fbcheck_ui_sbase <- function(type="tab", title="Data Quality and Processing", na
                                    #End temporal
                                    
                                    selectInput(inputId = "fbcheck_fbapp_ExportFormat_sbase",label = "Spreadsheet format download",
-                                               choices = c("Standard", "SPBase Format"), selected = 2)
+                                               choices = c("Standard", "SPBase Format"), selected = 2)#,
+                                   
+                                   #actionButton("tabBut", "View Summary Statistics")
+                                  
                                   
                                  ),
                             
@@ -151,7 +155,15 @@ fbcheck_ui_sbase <- function(type="tab", title="Data Quality and Processing", na
                                 12,
                                 shinysky::shinyalert("alert_fbapp_warning_sbase", FALSE, auto.close.after = 11),
                                 rHandsontableOutput("hot_btable_fbapp_sbase",height = "600px",width = "100%")
-                              )
+                              )#,
+                              # column(
+                              #   12,
+                              #   bsModal("modalExample", "Summary Statistics", "tabBut", size = "large",
+                              #             fluidRow(
+                              #               id = "logContent"
+                              #             )
+                              #           )
+                              # )
                             )
                           ),
                           br(),

@@ -29,8 +29,6 @@ ck_duplicate <-  function(dfr=data.frame(), attribute){
   
 }
 
-
-
 #' Check error in FieldbookApp data
 #' 
 #' @param dfr data frame. FieldbookApp data.
